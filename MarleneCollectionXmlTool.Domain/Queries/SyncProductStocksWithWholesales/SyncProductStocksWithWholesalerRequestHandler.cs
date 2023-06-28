@@ -197,8 +197,8 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                     var regularPrice = productMetaDetails?
                         .Where(x => x.PostId == parentPostId)?
                         .Where(x => x.MetaKey == "_price")?
-                        .First()
-                        .MetaValue;
+                        .First()?
+                        .MetaValue ?? "0";
 
                     variantProductWpPostDto.PostTitle = parentPost.PostTitle;
                     variantProductWpPostDto.RegularPrice = regularPrice;

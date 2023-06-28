@@ -1,11 +1,12 @@
 ﻿using MarleneCollectionXmlTool.DBAccessLayer.Cache.Models;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
+using System.Collections.Immutable;
 
 namespace MarleneCollectionXmlTool.DBAccessLayer.Cache;
 
 public interface ICacheProvider
 {
-    List<WpTerm> GetAllWpTerms();
+    ImmutableList<WpTerm> GetAllWpTerms();
 }
 
 public class CacheProvider : ICacheProvider
@@ -31,5 +32,5 @@ public class CacheProvider : ICacheProvider
         }
     }
 
-    public List<WpTerm> GetAllWpTerms() => GetAnyCacheData<List<WpTerm>>("WpTerms");
+    public ImmutableList<WpTerm> GetAllWpTerms() => GetAnyCacheData<ImmutableList<WpTerm>>("WpTerms");
 }

@@ -1,13 +1,14 @@
 ﻿using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
+using System.Collections.Immutable;
 
 namespace MarleneCollectionXmlTool.Domain.Helpers.WpPostHelpers;
 
 public interface IProductAttributeHelper
 {
     string CreateProductAttributesString(WpPostDto parentProductDto, List<WpPostDto> variantProductsDtos);
-    ProductAttributesDto MapParentProductTaxonomyValues(ulong parentProductId, WpPostDto parentProductDto, List<WpPostDto> variableProductDtos, List<WpTerm> terms);
-    ProductAttributesDto MapVariableProductTaxonomyValues(ulong variantProductId, ulong parentProductId, WpPostDto variableProductDto, List<WpTerm> terms);
+    ProductAttributesDto MapParentProductTaxonomyValues(ulong parentProductId, WpPostDto parentProductDto, List<WpPostDto> variableProductDtos, ImmutableList<WpTerm> terms);
+    ProductAttributesDto MapVariableProductTaxonomyValues(ulong variantProductId, ulong parentProductId, WpPostDto variableProductDto, ImmutableList<WpTerm> terms);
 }
 
 public record ProductAttributesDto(List<WpWcProductAttributesLookup> AttributesLookups, List<WpTermRelationship> Relationships);
@@ -153,7 +154,7 @@ public class ProductAttributeHelper : IProductAttributeHelper
     }
 
     public ProductAttributesDto MapParentProductTaxonomyValues(
-        ulong parentProductId, WpPostDto parentProductDto, List<WpPostDto> variableProductDtos, List<WpTerm> terms)
+        ulong parentProductId, WpPostDto parentProductDto, List<WpPostDto> variableProductDtos, ImmutableList<WpTerm> terms)
     {
         var rozmiarAttributeValues = variableProductDtos.SelectMany(x => x.AttributeRozmiar?.Split(","))?.ToList();
         var fasonAttributeValues = parentProductDto.AttributeFason?.Split(",")?.ToList();
@@ -200,7 +201,7 @@ public class ProductAttributeHelper : IProductAttributeHelper
     }
 
     public ProductAttributesDto MapVariableProductTaxonomyValues(
-        ulong variantProductId, ulong parentProductId, WpPostDto variableProductDto, List<WpTerm> terms)
+        ulong variantProductId, ulong parentProductId, WpPostDto variableProductDto, ImmutableList<WpTerm> terms)
     {
         var rozmiarAttributeValues = variableProductDto.AttributeRozmiar?.Split(",").ToList();
         var fasonAttributeValues = variableProductDto.AttributeFason?.Split(",")?.ToList();
@@ -244,24 +245,38 @@ public class ProductAttributeHelper : IProductAttributeHelper
         return new ProductAttributesDto(productAttributesLookup, termRelationships);
     }
 
-    private static List<ulong> MapTaxonomyRelationship(List<string> attributeValues, List<WpTerm> terms)
+    private static List<ulong> MapTaxonomyRelationship(List<string> attributeValues, ImmutableList<WpTerm> terms)
     {
-        var termTaxonomyIds = new List<ulong>();
-
-        if (attributeValues == null)
-            return termTaxonomyIds;
-
-        foreach (var attribute in attributeValues)
+        try
         {
-            var taxonomyId = terms
-                .Where(x => x.Name.ToUpper() == attribute.ToUpper())
-                .First()
-                .TermId;
+            var termTaxonomyIds = new List<ulong>();
 
-            termTaxonomyIds.Add(taxonomyId);
+            if (attributeValues == null)
+                return termTaxonomyIds;
+
+            foreach (var attribute in attributeValues)
+            {
+                if (string.IsNullOrEmpty(attribute)) continue;
+
+                var attributeName = attribute.ToUpper();
+                if (attribute.ToUpper() == "GREEN") attributeName = "ZIELONY";
+                if (attribute.ToUpper() == "CREAM") attributeName = "ECRU";
+                if (attribute.ToUpper() == "CZARNA") attributeName = "CZARNY";
+
+                var taxonomyId = terms
+                    .Where(x => x.Name.ToUpper() == attributeName)
+                    .First()
+                    .TermId;
+
+                termTaxonomyIds.Add(taxonomyId);
+            }
+
+            return termTaxonomyIds;
         }
-
-        return termTaxonomyIds;
+        catch (Exception ex) 
+        { 
+            return new List<ulong>();
+        }
     }
 
     private static (List<WpWcProductAttributesLookup> attributesLookups, List<WpTermRelationship> wpTermRelationships) MapAttributesLookupAndRelations(
