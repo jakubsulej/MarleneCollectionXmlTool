@@ -15,8 +15,11 @@ public class SyncProductsWithWholesalerScheduler
         _mediator = mediator;
     }
 
+    /// <summary>
+    /// 6.00 utc every day
+    /// </summary>
     [Function("SyncProductsWithHurtIvon")]
-    public async Task SyncProductsWithHurtIvon([TimerTrigger("1 * * * * *")] SyncProductStocksWithWholesalerRequest request)
+    public async Task SyncProductsWithHurtIvon([TimerTrigger("0 6 * * * *")] SyncProductStocksWithWholesalerRequest request)
     {
         try
         {
