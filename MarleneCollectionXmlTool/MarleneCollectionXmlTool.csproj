@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MarleneCollectionXmlTool.Domain\MarleneCollectionXmlTool.Domain.csproj" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\sharedSettings.json" CopyToOutputDirectory="PreserveNewest">
+			<Link>sharedSettings.json</Link>
+		</None>
+		<None Include="appsettings.json" CopyToOutputDirectory="PreserveNewest">
+			<DependentUpon>sharedSettings.json</DependentUpon>
+		</None>
+	</ItemGroup>
+</Project>

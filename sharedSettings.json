@@ -1,0 +1,17 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "BaseClientUrl": "https://marlenecollection.pl",
+  "HurtIvonBaseUrl": "https://hurt.ivon-sklep.pl",
+  "NestedVariantsXmlUrl": "feed,xml_extended,8ac59136ff139f46a97fd4e117f9938b?open",
+  "DB_NAME": "server681893",
+  "DB_USER": "server681893",
+  "DB_PASSWORD": "cbWd:O87CVE=zk.LJQ-3S9nnpECLiEDI",
+  "DB_HOST": "mariadb105.server681893.nazwa.pl",
+  "DB_PORT": 3306
+}

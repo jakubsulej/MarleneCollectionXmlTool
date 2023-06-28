@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33414.496
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarleneCollectionXmlTool", "MarleneCollectionXmlTool\MarleneCollectionXmlTool.csproj", "{C8422E3C-7A9B-4E2E-90AA-E1968EAF7408}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarleneCollectionXmlTool.Domain", "MarleneCollectionXmlTool.Domain\MarleneCollectionXmlTool.Domain.csproj", "{7909EC4A-8582-4ADF-AFE5-201C15A6C1D0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarleneCollectionXmlTool.DBAccessLayer", "MarleneCollectionXmlTool.DBAccessLayer\MarleneCollectionXmlTool.DBAccessLayer.csproj", "{F061143B-E995-442F-AF73-FE5B80F8D670}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarleneCollectionXmlTool.Domain.Tests", "MarleneCollectionXmlTool.Domain.Tests\MarleneCollectionXmlTool.Domain.Tests.csproj", "{54C3BB47-F555-469D-B1E1-407A6DBF85B9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarleneCollectionXmlTool.Customizations", "MarleneCollectionXmlTool.Customizations\MarleneCollectionXmlTool.Customizations.csproj", "{B33D0256-5252-4E5D-82E8-EDC88B6FF5F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarleneCollectionXmlTool.AzureFunctions", "MarleneCollectionXmlTool.AzureFunctions\MarleneCollectionXmlTool.AzureFunctions.csproj", "{AFB3B115-8B96-4772-B6B2-5B89542D04A7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C8422E3C-7A9B-4E2E-90AA-E1968EAF7408}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8422E3C-7A9B-4E2E-90AA-E1968EAF7408}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8422E3C-7A9B-4E2E-90AA-E1968EAF7408}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8422E3C-7A9B-4E2E-90AA-E1968EAF7408}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7909EC4A-8582-4ADF-AFE5-201C15A6C1D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7909EC4A-8582-4ADF-AFE5-201C15A6C1D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7909EC4A-8582-4ADF-AFE5-201C15A6C1D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7909EC4A-8582-4ADF-AFE5-201C15A6C1D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F061143B-E995-442F-AF73-FE5B80F8D670}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F061143B-E995-442F-AF73-FE5B80F8D670}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F061143B-E995-442F-AF73-FE5B80F8D670}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F061143B-E995-442F-AF73-FE5B80F8D670}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54C3BB47-F555-469D-B1E1-407A6DBF85B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54C3BB47-F555-469D-B1E1-407A6DBF85B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54C3BB47-F555-469D-B1E1-407A6DBF85B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54C3BB47-F555-469D-B1E1-407A6DBF85B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B33D0256-5252-4E5D-82E8-EDC88B6FF5F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B33D0256-5252-4E5D-82E8-EDC88B6FF5F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B33D0256-5252-4E5D-82E8-EDC88B6FF5F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B33D0256-5252-4E5D-82E8-EDC88B6FF5F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFB3B115-8B96-4772-B6B2-5B89542D04A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFB3B115-8B96-4772-B6B2-5B89542D04A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFB3B115-8B96-4772-B6B2-5B89542D04A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFB3B115-8B96-4772-B6B2-5B89542D04A7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BFF99DF4-CC20-4228-8977-51A6BBA226BE}
+	EndGlobalSection
+EndGlobal
