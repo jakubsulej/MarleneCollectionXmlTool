@@ -54,6 +54,7 @@ public static class ServiceCollectionExtensions
         //Business services
         services.AddScoped<IProductAttributeService, ProductAttributeService>();
         services.AddScoped<IProductMetaService, ProductMetaService>();
+        services.AddScoped<IImageService, ImageService>();
 
         //Cache services
         services.AddScoped<ICacheProvider, CacheProvider>();
