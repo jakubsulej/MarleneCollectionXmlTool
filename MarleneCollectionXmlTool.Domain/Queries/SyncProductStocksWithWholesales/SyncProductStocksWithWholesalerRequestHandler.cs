@@ -2,7 +2,6 @@
 using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
-using MarleneCollectionXmlTool.Domain.Helpers.WpPostHelpers;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Services;
 using MediatR;
@@ -29,7 +28,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
     public SyncProductStocksWithWholesalerRequestHandler(
         IGetXmlDocumentFromWholesalerService wholesalerService,
-        IProductAttributeService productAttributeService,
+        IProductAttributeService productAttributeService, 
         IProductMetaService metaService,
         ICacheProvider cacheProvider,
         IConfiguration configuration,

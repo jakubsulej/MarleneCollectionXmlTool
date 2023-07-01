@@ -1,8 +1,8 @@
 ﻿using Azure;
 using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
-using MarleneCollectionXmlTool.Domain.Helpers.WpPostHelpers;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
+using MarleneCollectionXmlTool.Domain.Services;
 using MarleneCollectionXmlTool.Domain.Tests.Utils;
 using Xunit;
 

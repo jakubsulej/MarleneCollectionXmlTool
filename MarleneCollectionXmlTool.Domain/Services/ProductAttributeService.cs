@@ -1,9 +1,10 @@
 ﻿using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
+using MarleneCollectionXmlTool.Domain.Helpers;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
 using System.Collections.Immutable;
 
-namespace MarleneCollectionXmlTool.Domain.Helpers.WpPostHelpers;
+namespace MarleneCollectionXmlTool.Domain.Services;
 
 public interface IProductAttributeService
 {
@@ -154,7 +155,7 @@ public class ProductAttributeService : IProductAttributeService
         //{
         //    wholesalerAttributes[i] = _valueMappingService.GetCustomAttributeMappingValue(attributeKey, wholesalerAttributes[i]);
         //}
-        
+
         for (int i = 0; i < wholesalerAttributes.Count; i++)
         {
             wholesalerAttributes[i] = wholesalerAttributes[i].FirstLetterToUpper();
@@ -202,7 +203,7 @@ public class ProductAttributeService : IProductAttributeService
         productAttributesLookup.AddRange(dlugoscLookups.attributesLookups);
         termRelationships.AddRange(dlugoscLookups.wpTermRelationships);
 
-        if (parentProductDto.StockStatus == "outofstock") 
+        if (parentProductDto.StockStatus == "outofstock")
             termRelationships.Add(new WpTermRelationship(parentProductId, 9));
 
         var distinctRelations = new List<WpTermRelationship>();
@@ -304,8 +305,8 @@ public class ProductAttributeService : IProductAttributeService
 
             return termTaxonomyIds;
         }
-        catch (Exception ex) 
-        { 
+        catch (Exception ex)
+        {
             return new List<ulong>();
         }
     }

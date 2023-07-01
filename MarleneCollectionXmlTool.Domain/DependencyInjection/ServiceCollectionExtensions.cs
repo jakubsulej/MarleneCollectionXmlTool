@@ -1,6 +1,5 @@
 ﻿using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Cache;
-using MarleneCollectionXmlTool.Domain.Helpers.WpPostHelpers;
 using MarleneCollectionXmlTool.Domain.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
