@@ -53,7 +53,7 @@ public static class ServiceCollectionExtensions
         services.AddMediatR(thisAssemblyMarker);
 
         //Business services
-        services.AddSingleton<IProductAttributeHelper, ProductAttributeHelper>();
+        services.AddScoped<IProductAttributeService, ProductAttributeService>();
 
         //Cache services
         services.AddScoped<ICacheProvider, CacheProvider>();

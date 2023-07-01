@@ -24,7 +24,7 @@ public class CacheDataRepository : ICacheDataRepository
 
     public async Task<CacheData> GetCacheDataAsync() => new CacheData()
     {
-        WpTerms = await GetDataCacheResponse(CacheKeys.WpTerms, CacheSemaphores.GetWpTerms, 5, 2) as ImmutableList<WpTerm>,
+        WpTerms = await GetDataCacheResponse(CacheKeys.WpTerms, CacheSemaphores.GetWpTerms, 5, 2) as List<WpTerm>,
     };
 
     private async Task<object> GetDataCacheResponse(string cacheKey, SemaphoreSlim semaphore, int absoluteExpiration = 20, int slidingExpiration = 10)
@@ -60,13 +60,13 @@ public class CacheDataRepository : ICacheDataRepository
         _ => throw new NotImplementedException(),
     };
 
-    private async Task<ImmutableList<WpTerm>> GetAllWpTermsAsync()
+    private async Task<List<WpTerm>> GetAllWpTermsAsync()
     {
         var wpTerms = await _dbContext
             .WpTerms
             .ToListAsync();
 
-        return wpTerms.ToImmutableList();
+        return wpTerms;
     }
 
     private static MemoryCacheEntryOptions GetMemoryCacheEntryOptions(int absoluteExpiration, int slidingExpiration, int size = 30000000) => new()

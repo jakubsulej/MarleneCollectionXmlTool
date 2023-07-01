@@ -6,7 +6,7 @@ namespace MarleneCollectionXmlTool.DBAccessLayer.Cache;
 
 public interface ICacheProvider
 {
-    ImmutableList<WpTerm> GetAllWpTerms();
+    List<WpTerm> GetAllWpTerms();
 }
 
 public class CacheProvider : ICacheProvider
@@ -32,5 +32,5 @@ public class CacheProvider : ICacheProvider
         }
     }
 
-    public ImmutableList<WpTerm> GetAllWpTerms() => GetAnyCacheData<ImmutableList<WpTerm>>("WpTerms");
+    public List<WpTerm> GetAllWpTerms() => GetAnyCacheData<List<WpTerm>>("WpTerms");
 }

@@ -11,12 +11,12 @@ namespace MarleneCollectionXmlTool.Domain.Tests.Helpers.WpPostHelpers;
 public class ProductAttributeHelperTests
 {
     private readonly WoocommerceDbContext _dbContext;
-    private readonly ProductAttributeHelper _sut;
+    private readonly ProductAttributeService _sut;
 
     public ProductAttributeHelperTests()
     {
         _dbContext = FakeDbContextFactory.CreateMockDbContext<WoocommerceDbContext>();
-        _sut = new ProductAttributeHelper();
+        _sut = new ProductAttributeService(_dbContext);
     }
 
     [Fact]

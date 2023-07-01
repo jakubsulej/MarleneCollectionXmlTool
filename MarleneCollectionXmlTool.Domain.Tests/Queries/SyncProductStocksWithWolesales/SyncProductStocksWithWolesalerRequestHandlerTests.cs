@@ -20,12 +20,12 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
     private readonly ICacheProvider _cacheProvider;
     private readonly SyncProductStocksWithWholesalerRequestHandler _sut;
     private readonly IGetXmlDocumentFromWholesalerService _wholesalerService;
-    private readonly IProductAttributeHelper _productAttributeHelper;
+    private readonly IProductAttributeService _productAttributeHelper;
 
     public SyncProductStocksWithWolesalerRequestHandlerTests()
     {
         _wholesalerService = A.Fake<IGetXmlDocumentFromWholesalerService>();
-        _productAttributeHelper = A.Fake<IProductAttributeHelper>();
+        _productAttributeHelper = A.Fake<IProductAttributeService>();
         A.CallTo(() => _productAttributeHelper.CreateProductAttributesString(A<WpPostDto>._, A<List<WpPostDto>>._)).Returns(string.Empty);
         _dbContext = FakeDbContextFactory.CreateMockDbContext<WoocommerceDbContext>();
         _configuration = A.Fake<IConfiguration>();

@@ -15,7 +15,7 @@ namespace MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesale
 public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<SyncProductStocksWithWholesalerRequest, Result<SyncProductStocksWithWholesalerResponse>>
 {
     private readonly IGetXmlDocumentFromWholesalerService _wholesalerService;
-    private readonly IProductAttributeHelper _productAttributeHelper;
+    private readonly IProductAttributeService _productAttributeService;
     private readonly ICacheProvider _cacheProvider;
     private readonly string _baseClientUrl;
     private readonly WoocommerceDbContext _dbContext;
@@ -28,13 +28,13 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
     public SyncProductStocksWithWholesalerRequestHandler(
         IGetXmlDocumentFromWholesalerService wholesalerService,
-        IProductAttributeHelper productAttributeHelper,
+        IProductAttributeService productAttributeService,
         ICacheProvider cacheProvider,
         IConfiguration configuration,
         WoocommerceDbContext dbContext)
     {
         _wholesalerService = wholesalerService;
-        _productAttributeHelper = productAttributeHelper;
+        _productAttributeService = productAttributeService;
         _cacheProvider = cacheProvider;
         _baseClientUrl = configuration.GetValue<string>("BaseClientUrl");
         _dbContext = dbContext;
@@ -195,9 +195,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
                     var parentPost = parentProducts.First(x => x.Id == parentPostId);
                     var regularPrice = productMetaDetails?
-                        .Where(x => x.PostId == parentPostId)?
-                        .Where(x => x.MetaKey == "_price")?
-                        .First()?
+                        .FirstOrDefault(x => x.PostId == parentPostId && x.MetaKey == "_price")?
                         .MetaValue ?? "0";
 
                     variantProductWpPostDto.PostTitle = parentPost.PostTitle;
@@ -304,9 +302,9 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         var parentPostId = wpPost.Id;
         wpPost.Guid = $"{_baseClientUrl}/?post_type=product&p={parentPostId}";
 
-        var productAttributesString = _productAttributeHelper.CreateProductAttributesString(parentWpPostDto, variantProducts);
+        var productAttributesString = _productAttributeService.CreateProductAttributesString(parentWpPostDto, variantProducts);
         var terms = _cacheProvider.GetAllWpTerms();
-        var (attributesLookups, termRelationships) = _productAttributeHelper.MapParentProductTaxonomyValues(parentPostId, parentWpPostDto, variantProducts, terms);
+        var (attributesLookups, termRelationships) = await _productAttributeService.MapParentProductTaxonomyValues(parentPostId, parentWpPostDto, variantProducts, terms);
 
         var postMetas = new List<WpPostmetum>
         {
@@ -383,7 +381,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             variantPostIds.Add(variantPostId);
 
             var terms = _cacheProvider.GetAllWpTerms();
-            var taxonomy = _productAttributeHelper.MapVariableProductTaxonomyValues(variantPostId, parentPostId, variantWpPostDto, terms);
+            var taxonomy = await _productAttributeService.MapVariableProductTaxonomyValues(variantPostId, parentPostId, variantWpPostDto, terms);
             var relationships = taxonomy.Relationships;
             var attributeLookups = taxonomy.AttributesLookups;
 

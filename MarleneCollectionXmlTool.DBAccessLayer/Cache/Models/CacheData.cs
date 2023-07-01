@@ -5,5 +5,5 @@ namespace MarleneCollectionXmlTool.DBAccessLayer.Cache.Models;
 
 public class CacheData
 {
-    public ImmutableList<WpTerm> WpTerms { get; set; }
+    public List<WpTerm> WpTerms { get; set; }
 }
