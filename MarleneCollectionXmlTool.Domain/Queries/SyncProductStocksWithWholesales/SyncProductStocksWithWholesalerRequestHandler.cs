@@ -16,6 +16,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 {
     private readonly IGetXmlDocumentFromWholesalerService _wholesalerService;
     private readonly IProductAttributeService _productAttributeService;
+    private readonly IProductMetaService _metaService;
     private readonly ICacheProvider _cacheProvider;
     private readonly string _baseClientUrl;
     private readonly WoocommerceDbContext _dbContext;
@@ -29,12 +30,14 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
     public SyncProductStocksWithWholesalerRequestHandler(
         IGetXmlDocumentFromWholesalerService wholesalerService,
         IProductAttributeService productAttributeService,
+        IProductMetaService metaService,
         ICacheProvider cacheProvider,
         IConfiguration configuration,
         WoocommerceDbContext dbContext)
     {
         _wholesalerService = wholesalerService;
         _productAttributeService = productAttributeService;
+        _metaService = metaService;
         _cacheProvider = cacheProvider;
         _baseClientUrl = configuration.GetValue<string>("BaseClientUrl");
         _dbContext = dbContext;
@@ -249,7 +252,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                 variantPostIds.AddRange(newVariantPostIds);
             }
 
-            syncedPostIdsWithWholesaler.Add(parentPostId, variantPostIds);
+            syncedPostIdsWithWholesaler.TryAdd(parentPostId, variantPostIds);
         }
 
         return syncedPostIdsWithWholesaler;
@@ -305,6 +308,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         var productAttributesString = _productAttributeService.CreateProductAttributesString(parentWpPostDto, variantProducts);
         var terms = _cacheProvider.GetAllWpTerms();
         var (attributesLookups, termRelationships) = await _productAttributeService.MapParentProductTaxonomyValues(parentPostId, parentWpPostDto, variantProducts, terms);
+        var parentMetaLookup = _metaService.GenerateParentProductMetaLookup(parentWpPostDto);
 
         var postMetas = new List<WpPostmetum>
         {
@@ -335,6 +339,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         await _dbContext.WpPostmeta.AddRangeAsync(postMetas, cancellationToken);
         await _dbContext.WpTermRelationships.AddRangeAsync(termRelationships, cancellationToken);
         await _dbContext.WpWcProductAttributesLookups.AddRangeAsync(attributesLookups, cancellationToken);
+        await _dbContext.WpWcProductMetaLookups.AddRangeAsync(parentMetaLookup);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return parentPostId;
@@ -384,6 +389,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             var taxonomy = await _productAttributeService.MapVariableProductTaxonomyValues(variantPostId, parentPostId, variantWpPostDto, terms);
             var relationships = taxonomy.Relationships;
             var attributeLookups = taxonomy.AttributesLookups;
+            var variantMetaLookup = _metaService.GenerateVariantProductMetaLookup(variantWpPostDto);
 
             var postMetas = new List<WpPostmetum>
             {
@@ -413,6 +419,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             await _dbContext.WpPostmeta.AddRangeAsync(postMetas, cancellationToken);
             await _dbContext.WpTermRelationships.AddRangeAsync(relationships, cancellationToken);
             await _dbContext.WpWcProductAttributesLookups.AddRangeAsync(attributeLookups, cancellationToken);
+            await _dbContext.WpWcProductMetaLookups.AddRangeAsync(variantMetaLookup);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 

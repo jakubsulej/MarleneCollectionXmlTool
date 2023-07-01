@@ -18,6 +18,7 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
     private readonly WoocommerceDbContext _dbContext;
     private readonly IConfiguration _configuration;
     private readonly ICacheProvider _cacheProvider;
+    private readonly IProductMetaService _propdctMetaService;
     private readonly SyncProductStocksWithWholesalerRequestHandler _sut;
     private readonly IGetXmlDocumentFromWholesalerService _wholesalerService;
     private readonly IProductAttributeService _productAttributeHelper;
@@ -30,7 +31,8 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         _dbContext = FakeDbContextFactory.CreateMockDbContext<WoocommerceDbContext>();
         _configuration = A.Fake<IConfiguration>();
         _cacheProvider = A.Fake<ICacheProvider>();
-        _sut = new SyncProductStocksWithWholesalerRequestHandler(_wholesalerService, _productAttributeHelper, _cacheProvider, _configuration, _dbContext);
+        _propdctMetaService = A.Fake<IProductMetaService>();
+        _sut = new SyncProductStocksWithWholesalerRequestHandler(_wholesalerService, _productAttributeHelper, _propdctMetaService, _cacheProvider, _configuration, _dbContext);
     }
 
     /// <summary>D20-ZIELON.xml</summary>

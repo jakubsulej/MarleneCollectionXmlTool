@@ -205,7 +205,17 @@ public class ProductAttributeService : IProductAttributeService
         if (parentProductDto.StockStatus == "outofstock") 
             termRelationships.Add(new WpTermRelationship(parentProductId, 9));
 
-        return new ProductAttributesDto(productAttributesLookup, termRelationships);
+        var distinctRelations = new List<WpTermRelationship>();
+
+        foreach (var relation in termRelationships)
+        {
+            if (distinctRelations.Any(x => x.ObjectId == relation.ObjectId && x.TermTaxonomyId == relation.TermTaxonomyId))
+                continue;
+
+            distinctRelations.Add(relation);
+        }
+
+        return new ProductAttributesDto(productAttributesLookup, distinctRelations);
     }
 
     public async Task<ProductAttributesDto> MapVariableProductTaxonomyValues(
