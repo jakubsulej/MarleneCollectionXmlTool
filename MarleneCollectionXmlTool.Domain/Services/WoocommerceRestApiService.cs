@@ -8,7 +8,7 @@ namespace MarleneCollectionXmlTool.Domain.Services;
 
 public interface IWoocommerceRestApiService
 {
-    Task<Result> UpdateProduct(long productId, object json);
+    Task<Result> UpdateProduct(ulong productId, object json);
 }
 
 public class WoocommerceRestApiService : IWoocommerceRestApiService
@@ -24,7 +24,7 @@ public class WoocommerceRestApiService : IWoocommerceRestApiService
         _consumerSecret = configuration.GetValue<string>("WoocommerceConsumerSecret");
     }
 
-    public async Task<Result> UpdateProduct(long productId, object json)
+    public async Task<Result> UpdateProduct(ulong productId, object json)
     {
         var endpoint = $"products/{productId}";
         var response = await SendRequest(HttpMethod.Put, endpoint, json);

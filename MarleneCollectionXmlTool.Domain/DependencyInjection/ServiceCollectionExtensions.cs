@@ -55,6 +55,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductAttributeService, ProductAttributeService>();
         services.AddScoped<IProductMetaService, ProductMetaService>();
         services.AddScoped<IImageService, ImageService>();
+        services.AddScoped<IWoocommerceRestApiService, WoocommerceRestApiService>();
 
         //Cache services
         services.AddScoped<ICacheProvider, CacheProvider>();

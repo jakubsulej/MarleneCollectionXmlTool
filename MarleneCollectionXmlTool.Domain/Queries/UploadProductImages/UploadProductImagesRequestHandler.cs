@@ -61,6 +61,8 @@ public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductIm
                 .Where(x => parentProductIds.Contains(x.ProductId))?
                 .ToDictionaryAsync(x => x.ProductId, x => x.Sku, cancellationToken);
 
+            var imagesWithNames = new List<ImagesWithNamesDto>();
+
             foreach (var productIdSkuDict in productIdSkusDict)
             {
                 parentSkuImageDict.TryGetValue(productIdSkuDict.Value, out var details);
@@ -68,8 +70,12 @@ public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductIm
 
                 if (details == (null, null)) continue;
 
-                await _woocommerceRestApiService.UpdateProduct(productId, data);
+                var imagesWithNameDto = new ImagesWithNamesDto((ulong)productId, details.imageUrls, details.postTitle);
+                imagesWithNames.Add(imagesWithNameDto);
             }
+
+            
+            var addedImages = await _imageService.AddImagesOnServer(imagesWithNames);
 
             return Result.Ok();
         }
