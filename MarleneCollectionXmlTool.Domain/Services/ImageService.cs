@@ -7,6 +7,9 @@ using System.Drawing.Imaging;
 using System.Drawing;
 using System.Net;
 using System.Text.Json;
+using System.Net.Cache;
+using System.Text;
+using WinSCP;
 
 namespace MarleneCollectionXmlTool.Domain.Services;
 
@@ -34,10 +37,34 @@ public class ImageService : IImageService
     {
         var wpPostsWithMetadata = await UploadImagesOnServer(parentPostDto);
         var wpPosts = wpPostsWithMetadata.Select(x => x.WpPost).ToList();
-        var wpMetas = wpPostsWithMetadata.Select(x => x.Metadata).ToList();
 
-        await _dbContext.AddAsync(wpPosts);
-        await _dbContext.AddAsync(wpMetas);
+        await _dbContext.AddRangeAsync(wpPosts);
+        await _dbContext.SaveChangesAsync();
+
+        var wpMetas = new List<WpPostmetum>();
+
+        foreach (var wpPost in wpPostsWithMetadata)
+        {
+            var postMetas = new List<WpPostmetum>
+            {
+                new WpPostmetum 
+                {
+                    PostId = wpPost.WpPost.Id,
+                    MetaKey = "_wp_attached_file",
+                    MetaValue = $"2023/07/{wpPost.WpPost.PostTitle}",
+                },
+                new WpPostmetum
+                {
+                    PostId = wpPost.WpPost.Id,
+                    MetaKey = "_wp_attachment_metadata",
+                    MetaValue = wpPost.Metadata,
+                },
+            };
+
+            wpMetas.AddRange(postMetas);
+        }
+
+        await _dbContext.WpPostmeta.AddRangeAsync(wpMetas);
         await _dbContext.SaveChangesAsync();
 
         return wpPostsWithMetadata;
@@ -50,14 +77,24 @@ public class ImageService : IImageService
             var ftpUserName = "server681893_xml-service";
             var ftpPassword = "4yK7Mp1E^*n1";
             var ftpServer = "ftp.server681893.nazwa.pl";
-            var destinationFolder = "/wordpress/wpn_pierwszainstalacja/wp-content/uploads/07";
+            var destinationFolder = "wordpress/wpn_pierwszainstalacja/wp-content/uploads/07";
             var credentials = new NetworkCredential(ftpUserName, ftpPassword);
-            var fileName = wpPost.PostTitle.GenerateSlug();
+            var productName = wpPost.PostTitle.GenerateSlug();
 
-            var imageWpPosts = await Task.WhenAll(wpPost.ImageUrls
-                .Select(url => DownloadAndStoreImageAsync(url, fileName, destinationFolder, ftpServer, credentials)));
+            var imageWpPosts = new List<WpPostWithMetadata>();
 
-            return imageWpPosts.ToList();
+            var index = 1;
+            foreach (var url in wpPost.ImageUrls)
+            {
+                var fileName = $"{productName}-{index}"; 
+                
+                var imageWpPost = await DownloadAndStoreImageAsync(url, fileName, destinationFolder, ftpServer, credentials);
+                imageWpPosts.Add(imageWpPost);
+                
+                index++;
+            }
+
+            return imageWpPosts;
         }
         catch (Exception ex)
         {
@@ -70,24 +107,16 @@ public class ImageService : IImageService
         try
         {
             var allImageSizesWithMeta = await GetAllImageSizes(imageUrl, fileName);
-            var allImageSizes = allImageSizesWithMeta.images;
+            var allImageSizes = allImageSizesWithMeta.imagesWithNames;
             var metadata = allImageSizesWithMeta.metadata;
 
             var extension = Path.GetExtension(imageUrl);
             var fileNameWithExtension = $"{fileName}{extension}";
             var destinationPath = $"ftp://{ftpServer}/{destinationFolder}/{fileNameWithExtension}";
 
-            using (var ftpClient = new WebClient())
-            {
-                ftpClient.Credentials = credentials;
+            await PostImageToFtpServer(allImageSizes);
 
-                foreach (var file in allImageSizes)
-                {
-                    await ftpClient.UploadDataTaskAsync(destinationPath, file);
-                }
-            }
-
-            var postName = fileNameWithExtension.GenerateSlug();
+            var postName = fileNameWithExtension.Replace(".", "-");
             var postGuid = $"{_baseClientUrl}/{postName}";
 
             var post = new WpPost
@@ -109,10 +138,10 @@ public class ImageService : IImageService
                 PostModifiedGmt = DateTime.UtcNow,
                 PostContentFiltered = string.Empty,
                 PostParent = 0,
-                Guid = destinationPath,
+                Guid = postGuid,
                 MenuOrder = 0,
                 PostType = "attachment",
-                PostMimeType = $"image/{extension}",
+                PostMimeType = $"image/{extension.Replace(".", string.Empty)}",
                 CommentCount = 0
             };
 
@@ -124,82 +153,127 @@ public class ImageService : IImageService
         }
     }
 
-    private async Task<(List<byte[]> images, string metadata)> GetAllImageSizes(string imageUrl, string fileName)
+    private static async Task PostImageToFtpServer(List<(byte[] imageFile, string fileName)> files)
+    {
+        try
+        {
+            var ftpUserName = "server681893_xml-service";
+            var ftpPassword = "4yK7Mp1E^*n1";
+            var ftpServer = "ftp.server681893.nazwa.pl";
+            var destinationFolder = "wordpress/wpn_pierwszainstalacja/wp-content/uploads/2023/07";
+
+            // Set up session options
+            var sessionOptions = new SessionOptions
+            {
+                Protocol = Protocol.Sftp,
+                HostName = ftpServer,
+                UserName = ftpUserName,
+                Password = ftpPassword,
+                SshHostKeyFingerprint = "ecdsa-sha2-nistp256 256 nfa6DSkaZotWLQ1kHUBYzUmZ5sXY7OF7I3Soa7tpP5E",
+            };
+
+            using var session = new Session();
+            session.Open(sessionOptions);
+
+            foreach (var (imageFile, fileName) in files)
+            {
+                var tempFilePath = Path.GetTempFileName();
+
+                try
+                {
+                    var destinationPath = $"wordpress/wpn_pierwszainstalacja/wp-content/uploads/2023/07/{fileName}";
+                    await File.WriteAllBytesAsync(tempFilePath, imageFile);
+                    session.PutFiles(tempFilePath, destinationPath).Check();
+                }
+                finally
+                {
+                    File.Delete(tempFilePath);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+    }
+
+    private async Task<(List<(byte[] imageFile, string fileName)> imagesWithNames, string metadata)> GetAllImageSizes(string imageUrl, string fileName)
     {
         var mainImage = await _httpClient.GetByteArrayAsync(imageUrl);
 
-        int width = 1000;
-        int height = 1500;
-        string filePath = $"2023/07/{fileName}.jpeg";
-        int fileSize = 267178;
-        var allImageSizes = new List<byte[]>();
+        var width = 1000;
+        var height = 1500;
+        var extension = Path.GetExtension(imageUrl);
+        var filePath = $"2023/07/{fileName}{extension}";
+        var fileSize = mainImage.Length;
+        var allImageSizes = new List<(byte[] imageFile, string fileName)>();
         var sizesMetadata = new Dictionary<string, ImageSizeMetadata>();
 
-        allImageSizes.Add(mainImage);
+        allImageSizes.Add((mainImage, $"{fileName}{extension}"));
 
         var imageMedium = CropByteImage(mainImage, 200, 300);
-        allImageSizes.Add(imageMedium);
-        sizesMetadata.Add("medium", CreateImageSizeMetadata(fileName, 200, 300, imageMedium.Length));
+        allImageSizes.Add((imageMedium, GetFileName(fileName, extension, 200, 300)));
+        sizesMetadata.Add("medium", CreateImageSizeMetadata(fileName, extension, 200, 300, imageMedium.Length));
 
         var imageLarge = CropByteImage(mainImage, 683, 1024);
-        allImageSizes.Add(imageLarge);
-        sizesMetadata.Add("large", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((imageLarge, GetFileName(fileName, extension, 683, 1024)));
+        sizesMetadata.Add("large", CreateImageSizeMetadata(fileName, extension, 683, 1024, imageLarge.Length));
 
         var imageThumbnail = CropByteImage(mainImage, 150, 150);
-        allImageSizes.Add(imageThumbnail);
-        sizesMetadata.Add("thumbnail", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((imageThumbnail, GetFileName(fileName, extension, 150, 150)));
+        sizesMetadata.Add("thumbnail", CreateImageSizeMetadata(fileName, extension, 150, 150, imageThumbnail.Length));
 
         var medium_large = CropByteImage(mainImage, 768, 1152);
-        allImageSizes.Add(medium_large);
-        sizesMetadata.Add("medium_large", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((medium_large, GetFileName(fileName, extension, 768, 1152)));
+        sizesMetadata.Add("medium_large", CreateImageSizeMetadata(fileName, extension, 768, 1152, medium_large.Length));
 
         var postSliderThumbSize = CropByteImage(mainImage, 330, 190);
-        allImageSizes.Add(postSliderThumbSize);
-        sizesMetadata.Add("post-slider-thumb-size", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((postSliderThumbSize, GetFileName(fileName, extension, 330, 190)));
+        sizesMetadata.Add("post-slider-thumb-size", CreateImageSizeMetadata(fileName, extension, 330, 190, postSliderThumbSize.Length));
 
         var postCategoryThumbSize = CropByteImage(mainImage, 330, 330);
-        allImageSizes.Add(postCategoryThumbSize);
-        sizesMetadata.Add("post-category-slider-size", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((postCategoryThumbSize, GetFileName(fileName, extension, 330, 330)));
+        sizesMetadata.Add("post-category-slider-size", CreateImageSizeMetadata(fileName, extension, 330, 330, postCategoryThumbSize.Length));
 
         var blossomShopSchema = CropByteImage(mainImage, 600, 60);
-        allImageSizes.Add(blossomShopSchema);
-        sizesMetadata.Add("blossom-shop-schema", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((blossomShopSchema, GetFileName(fileName, extension, 600, 60)));
+        sizesMetadata.Add("blossom-shop-schema", CreateImageSizeMetadata(fileName, extension, 600, 60, blossomShopSchema.Length));
 
         var blossomShopBlog = CropByteImage(mainImage, 829, 623);
-        allImageSizes.Add(blossomShopBlog);
-        sizesMetadata.Add("blossom-shop-blog", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((blossomShopBlog, GetFileName(fileName, extension, 829, 623)));
+        sizesMetadata.Add("blossom-shop-blog", CreateImageSizeMetadata(fileName, extension, 829, 623, blossomShopBlog.Length));
 
         var blossomShopBlogFull = CropByteImage(mainImage, 1000, 623);
-        allImageSizes.Add(blossomShopBlogFull);
-        sizesMetadata.Add("blossom-shop-blog-full", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((blossomShopBlogFull, GetFileName(fileName, extension, 1000, 623)));
+        sizesMetadata.Add("blossom-shop-blog-full", CreateImageSizeMetadata(fileName, extension, 1000, 623, blossomShopBlogFull.Length));
 
         var blossomShopBlogList = CropByteImage(mainImage, 398, 297);
-        allImageSizes.Add(blossomShopBlogList);
-        sizesMetadata.Add("blossom-shop-blog-list", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((blossomShopBlogList, GetFileName(fileName, extension, 398, 297)));
+        sizesMetadata.Add("blossom-shop-blog-list", CreateImageSizeMetadata(fileName, extension, 398, 297, blossomShopBlogList.Length));
 
         var blossomShopSlider = CropByteImage(mainImage, 1000, 726);
-        allImageSizes.Add(blossomShopSlider);
-        sizesMetadata.Add("blossom-shop-slider", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((blossomShopSlider, GetFileName(fileName, extension, 1000, 726)));
+        sizesMetadata.Add("blossom-shop-slider", CreateImageSizeMetadata(fileName, extension, 1000, 726, blossomShopSlider.Length));
 
         var blossomShopFeatured = CropByteImage(mainImage, 860, 860);
-        allImageSizes.Add(blossomShopFeatured);
-        sizesMetadata.Add("blossom-shop-featured", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((blossomShopFeatured, GetFileName(fileName, extension, 860, 860)));
+        sizesMetadata.Add("blossom-shop-featured", CreateImageSizeMetadata(fileName, extension, 860, 860, blossomShopFeatured.Length));
 
         var blossomShopRecent = CropByteImage(mainImage, 540, 810);
-        allImageSizes.Add(blossomShopRecent);
-        sizesMetadata.Add("blossom-shop-recent", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((blossomShopRecent, GetFileName(fileName, extension, 540, 810)));
+        sizesMetadata.Add("blossom-shop-recent", CreateImageSizeMetadata(fileName, extension, 540, 810, blossomShopRecent.Length));
 
         var woocommerceThumbnail = CropByteImage(mainImage, 300, 300);
-        allImageSizes.Add(woocommerceThumbnail);
-        sizesMetadata.Add("woocommerce_thumbnail", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((woocommerceThumbnail, GetFileName(fileName, extension, 300, 300)));
+        sizesMetadata.Add("woocommerce_thumbnail", CreateImageSizeMetadata(fileName, extension, 300, 300, woocommerceThumbnail.Length));
 
         var woocommerceSingle = CropByteImage(mainImage, 600, 900);
-        allImageSizes.Add(woocommerceSingle);
-        sizesMetadata.Add("woocommerce_single", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((woocommerceSingle, GetFileName(fileName, extension, 600, 900)));
+        sizesMetadata.Add("woocommerce_single", CreateImageSizeMetadata(fileName, extension, 600, 900, woocommerceSingle.Length));
 
         var woocommerceGalleryThumbnail = CropByteImage(mainImage, 100, 100);
-        allImageSizes.Add(woocommerceGalleryThumbnail);
-        sizesMetadata.Add("woocommerce_gallery_thumbnail", CreateImageSizeMetadata(fileName, 683, 1024, imageMedium.Length));
+        allImageSizes.Add((woocommerceGalleryThumbnail, GetFileName(fileName, extension, 100, 100)));
+        sizesMetadata.Add("woocommerce_gallery_thumbnail", CreateImageSizeMetadata(fileName, extension, 100, 100, woocommerceGalleryThumbnail.Length));
 
         var metadata = GenerateImageMetadata(width, height, filePath, fileSize, sizesMetadata);
 
@@ -229,14 +303,19 @@ public class ImageService : IImageService
         return croppedImage;
     }
 
-    private static ImageSizeMetadata CreateImageSizeMetadata(string fileName, int width, int height, int fileSize) => new()
+    private static ImageSizeMetadata CreateImageSizeMetadata(string fileName, string fileExtension, int width, int height, int fileSize) => new()
     {
-        File = $"{fileName}-{width}x{height}.jpeg",
+        File = GetFileName(fileName, fileExtension, width, height),
         Width = width,
         Height = height,
-        MimeType = "image/jpeg",
+        MimeType = $"image/{fileExtension.Replace(".", string.Empty)}",
         FileSize = fileSize
     };
+
+    private static string GetFileName(string fileName, string fileExtension, int width, int height)
+    {
+        return $"{fileName}-{width}x{height}{fileExtension}";
+    }
 
     private static string GenerateImageMetadata(int width, int height, string filePath, int fileSize, Dictionary<string, ImageSizeMetadata> sizes)
     {
@@ -286,6 +365,5 @@ public class ImageService : IImageService
         public int Height { get; set; }
         public string MimeType { get; set; }
         public int FileSize { get; set; }
-        public bool? Uncropped { get; set; }
     }
 }

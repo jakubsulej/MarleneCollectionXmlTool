@@ -11,17 +11,20 @@ namespace MarleneCollectionXmlTool.Domain.Queries.UploadProductImages;
 public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductImagesRequest, Result<UploadProductImagesResponse>>
 {
     private readonly IGetXmlDocumentFromWholesalerService _wholesalerService;
-    private readonly WoocommerceDbContext _dbContext;
+    private readonly IWoocommerceRestApiService _woocommerceRestApiService;
     private readonly IImageService _imageService;
+    private readonly WoocommerceDbContext _dbContext;
 
     public UploadProductImagesRequestHandler(
         IGetXmlDocumentFromWholesalerService wholesalerService,
-        WoocommerceDbContext dbContext, 
-        IImageService imageService)
+        IWoocommerceRestApiService woocommerceRestApiService,
+        IImageService imageService,
+        WoocommerceDbContext dbContext)
     {
         _wholesalerService = wholesalerService;
-        _dbContext = dbContext;
+        _woocommerceRestApiService = woocommerceRestApiService;
         _imageService = imageService;
+        _dbContext = dbContext;
     }
 
     public async Task<Result<UploadProductImagesResponse>> Handle(UploadProductImagesRequest request, CancellationToken cancellationToken)
@@ -54,25 +57,18 @@ public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductIm
                 .Select(x => (long)x.Id)
                 .ToListAsync(cancellationToken);
 
-            var skus = await _dbContext.WpWcProductMetaLookups
+            var productIdSkusDict = await _dbContext.WpWcProductMetaLookups
                 .Where(x => parentProductIds.Contains(x.ProductId))?
-                .Select(x => x.Sku)?
-                .ToListAsync(cancellationToken);
+                .ToDictionaryAsync(x => x.ProductId, x => x.Sku, cancellationToken);
 
-            foreach (var sku in skus)
+            foreach (var productIdSkuDict in productIdSkusDict)
             {
-                parentSkuImageDict.TryGetValue(sku, out var details);
+                parentSkuImageDict.TryGetValue(productIdSkuDict.Value, out var details);
+                var productId = productIdSkuDict.Key;
 
                 if (details == (null, null)) continue;
 
-                var postDto = new WpPostDto
-                {
-                    PostTitle = details.postTitle,
-                    Sku = sku,
-                    ImageUrls = details.imageUrls
-                };
-
-                var postWithMetadata = await _imageService.AddImagesForProduct(postDto);
+                await _woocommerceRestApiService.UpdateProduct(productId, data);
             }
 
             return Result.Ok();
@@ -80,6 +76,16 @@ public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductIm
         catch
         {
             return Result.Fail("Error");
+        }
+    }
+
+    internal class ProductUpdateData
+    {
+        public List<ProductImage> Images { get; set; }
+
+        internal class ProductImage
+        {
+            public string Src { get; set; }
         }
     }
 }
