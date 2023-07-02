@@ -6,12 +6,19 @@
     }
   },
   "AllowedHosts": "*",
-  "BaseClientUrl": "https://marlenecollection.pl",
-  "HurtIvonBaseUrl": "https://hurt.ivon-sklep.pl",
-  "NestedVariantsXmlUrl": "feed,xml_extended,8ac59136ff139f46a97fd4e117f9938b?open",
-  "DB_NAME": "server681893",
-  "DB_USER": "server681893",
-  "DB_PASSWORD": "cbWd:O87CVE=zk.LJQ-3S9nnpECLiEDI",
-  "DB_HOST": "mariadb105.server681893.nazwa.pl",
-  "DB_PORT": 3306
+  "BaseClientUrl": "<secret>",
+  "HurtIvonBaseUrl": "<secret>",
+  "NestedVariantsXmlUrl": "<secret>",
+  "DB_NAME": "<secret>",
+  "DB_USER": "<secret>",
+  "DB_PASSWORD": "<secret>",
+  "DB_HOST": "<secret>",
+  "DB_PORT": 0,
+  "WoocommerceConsumerKey": "<secret>",
+  "WoocommerceConsumerSecret": "<secret>",
+  "FtpUserName": "<secret>",
+  "FtpPassword": "<secret>",
+  "FtpServer": "<secret>",
+  "DestinationFolder": "<secret>",
+  "SshHostFingerpring": "<secret>"
 }

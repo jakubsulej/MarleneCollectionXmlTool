@@ -100,10 +100,12 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
             if (isParentProductMissingInCatalog)
             {
-                var parentProductMeta = productMetaDetails
-                    .Where(x => x.PostId == item.Id)
-                    .Where(x => x.MetaKey == "_stock_status")
-                    .First();
+                var parentProductMeta = productMetaDetails?
+                    .Where(x => x.PostId == item.Id)?
+                    .Where(x => x.MetaKey == "_stock_status")?
+                    .FirstOrDefault();
+
+                if (parentProductMeta == null) continue;
 
                 parentProductMeta.MetaValue = "outofstock";
 
@@ -127,8 +129,13 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                     .Where(x => x.PostId == variantProductMissingInCatalog.Id)
                     .ToList();
 
-                variantProductMeta.First(x => x.MetaKey == "_stock").MetaValue = "0";
-                variantProductMeta.First(x => x.MetaKey == "_stock_status").MetaValue = "outofstock";
+                if (variantProductMeta.Any() == false 
+                    || variantProductMeta.Any(x => x.MetaKey == "_stock") == false
+                    || variantProductMeta.Any(x => x.MetaKey == "_stock_status") == false) 
+                    continue;
+
+                variantProductMeta.FirstOrDefault(x => x.MetaKey == "_stock").MetaValue = "0";
+                variantProductMeta.FirstOrDefault(x => x.MetaKey == "_stock_status").MetaValue = "outofstock";
             }
         }
 

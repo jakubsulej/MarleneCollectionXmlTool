@@ -5,6 +5,7 @@
 	  <StartupObject>MarleneCollectionXmlTool.DBAccessLayer.Program</StartupObject>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <OutputType>Exe</OutputType>
+	  <UserSecretsId>cad031b0-de79-44ae-a225-d93e78ef344b</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +22,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
     <PackageReference Include="MySql.Data" Version="8.0.33" />
     <PackageReference Include="MySql.EntityFrameworkCore" Version="7.0.2" />
     <PackageReference Include="MySqlConnector" Version="2.2.6" />

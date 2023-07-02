@@ -63,7 +63,7 @@ public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductIm
 
             var imagesWithNames = new List<ImagesWithNamesDto>();
 
-            foreach (var productIdSkuDict in productIdSkusDict)
+            foreach (var productIdSkuDict in productIdSkusDict.Where(x => x.Key == 5571).ToList())
             {
                 parentSkuImageDict.TryGetValue(productIdSkuDict.Value, out var details);
                 var productId = productIdSkuDict.Key;
@@ -73,7 +73,6 @@ public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductIm
                 var imagesWithNameDto = new ImagesWithNamesDto((ulong)productId, details.imageUrls, details.postTitle);
                 imagesWithNames.Add(imagesWithNameDto);
             }
-
             
             var addedImages = await _imageService.AddImagesOnServer(imagesWithNames);
 

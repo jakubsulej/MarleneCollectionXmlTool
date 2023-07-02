@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
 
 namespace MarleneCollectionXmlTool.Domain.Services;
 
@@ -45,7 +46,7 @@ public class WoocommerceRestApiService : IWoocommerceRestApiService
 
             if (data != null)
             {
-                request.Content = new StringContent(data.ToString(), Encoding.UTF8, "application/json");
+                request.Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
             }
 
             var response = await _httpClient.SendAsync(request);

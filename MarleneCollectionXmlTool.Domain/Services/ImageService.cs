@@ -1,5 +1,7 @@
 ﻿using MarleneCollectionXmlTool.Domain.Helpers;
 using Microsoft.Extensions.Configuration;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using WinSCP;
 
 namespace MarleneCollectionXmlTool.Domain.Services;
@@ -16,11 +18,25 @@ public class ImageService : IImageService
 {
     private readonly HttpClient _httpClient;
     private readonly IWoocommerceRestApiService _woocommerceRestApiService;
+    private readonly string _ftpUserName;
+    private readonly string _ftpPassword;
+    private readonly string _clientBaseUrl;
+    private readonly string _ftpServer;
+    private readonly string _ftpFolder;
+    private readonly string _destinationFolder;
+    private readonly string _sshHostFingerprint;
 
     public ImageService(IConfiguration configuration, IWoocommerceRestApiService woocommerceRestApiService)
     {
         _httpClient = new HttpClient();
         _woocommerceRestApiService = woocommerceRestApiService;
+        _ftpUserName = configuration.GetValue<string>("FtpUserName");
+        _ftpPassword = configuration.GetValue<string>("FtpPassword");
+        _clientBaseUrl = configuration.GetValue<string>("BaseClientUrl");
+        _ftpServer = configuration.GetValue<string>("FtpServer");
+        _ftpFolder = configuration.GetValue<string>("FtpFolder");
+        _destinationFolder = configuration.GetValue<string>("DestinationFolder");
+        _sshHostFingerprint = configuration.GetValue<string>("SshHostFingerpring");
     }
 
     public async Task<Dictionary<ulong, string>> AddImagesOnServer(List<ImagesWithNamesDto> imagesWithNames)
@@ -35,7 +51,8 @@ public class ImageService : IImageService
             var index = 1;
             foreach (var imageUrl in imageWithName.Urls)
             {
-                var fileName = $"{productName}-{index}";
+                var extension = Path.GetExtension(imageUrl);
+                var fileName = $"{productName}-{index}{extension}";
 
                 var imageBytes = await _httpClient.GetByteArrayAsync(imageUrl);
                 images.Add(new ImagesForProductUploadDto(productId, imageBytes, fileName));
@@ -50,18 +67,13 @@ public class ImageService : IImageService
 
     private async Task<Dictionary<ulong, string>> PostImageToFtpServer(List<ImagesForProductUploadDto> files)
     {
-        var ftpUserName = "server681893_xml-service";
-        var ftpPassword = "4yK7Mp1E^*n1";
-        var ftpServer = "ftp.server681893.nazwa.pl";
-        var destinationFolder = "wordpress/wpn_pierwszainstalacja/wp-content/uploads/2023/07";
-
         var sessionOptions = new SessionOptions
         {
             Protocol = Protocol.Sftp,
-            HostName = ftpServer,
-            UserName = ftpUserName,
-            Password = ftpPassword,
-            SshHostKeyFingerprint = "ecdsa-sha2-nistp256 256 nfa6DSkaZotWLQ1kHUBYzUmZ5sXY7OF7I3Soa7tpP5E",
+            HostName = _ftpServer,
+            UserName = _ftpUserName,
+            Password = _ftpPassword,
+            SshHostKeyFingerprint = _sshHostFingerprint,
         };
 
         var productIdUrlDict = new Dictionary<ulong, string>();
@@ -78,19 +90,22 @@ public class ImageService : IImageService
 
                 try
                 {
-                    var destinationPath = $"{destinationFolder}/{file.FileName}";
+                    var destinationPath = $"wordpress/wpn_pierwszainstalacja/wp-content/uploads/2023/07/{file.FileName}";
                     await File.WriteAllBytesAsync(tempFilePath, file.Bytes);
                     session.PutFiles(tempFilePath, destinationPath).Check();
 
                     productIdUrlDict.TryAdd(file.ProductId, destinationPath);
+                    var absolutePath = $"{_clientBaseUrl}/{_destinationFolder}/{file.FileName}";
 
                     var data = new ProductDto
                     {
                         Images = new List<ProductDto.ImageDto>
                         {
-                            new ProductDto.ImageDto { Src = destinationPath }
+                            new ProductDto.ImageDto { Src = absolutePath }
                         }
                     };
+
+                    var dataString = JsonSerializer.Serialize(data);
 
                     await _woocommerceRestApiService.UpdateProduct(file.ProductId, data);
                 }
