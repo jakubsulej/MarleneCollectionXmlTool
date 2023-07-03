@@ -9,7 +9,7 @@ namespace MarleneCollectionXmlTool.Domain.Services;
 
 public interface IWoocommerceRestApiService
 {
-    Task<Result> UpdateProduct(ulong productId, object json);
+    Task<Result> UpdateProduct(ulong productId, string json);
 }
 
 public class WoocommerceRestApiService : IWoocommerceRestApiService
@@ -20,14 +20,14 @@ public class WoocommerceRestApiService : IWoocommerceRestApiService
 
     public WoocommerceRestApiService(IConfiguration configuration)
     {
-        _httpClient = new HttpClient { BaseAddress = new Uri(configuration.GetValue<string>("BaseClientUrl") + "/wp-json/wc/v3/") };
+        _httpClient = new HttpClient { BaseAddress = new Uri(configuration.GetValue<string>("BaseClientUrl")) };
         _consumerKey = configuration.GetValue<string>("WoocommerceConsumerKey");
         _consumerSecret = configuration.GetValue<string>("WoocommerceConsumerSecret");
     }
 
-    public async Task<Result> UpdateProduct(ulong productId, object json)
+    public async Task<Result> UpdateProduct(ulong productId, string json)
     {
-        var endpoint = $"products/{productId}";
+        var endpoint = $"/wp-json/wc/v3/products/{productId}";
         var response = await SendRequest(HttpMethod.Put, endpoint, json);
 
         if (response.IsSuccess)
@@ -36,7 +36,7 @@ public class WoocommerceRestApiService : IWoocommerceRestApiService
         return Result.Fail("error");
     }
 
-    private async Task<Result<HttpStatusCode>> SendRequest(HttpMethod method, string endpoint, object data = null)
+    private async Task<Result<HttpStatusCode>> SendRequest(HttpMethod method, string endpoint, string data = null)
     {
         try
         {
@@ -46,7 +46,7 @@ public class WoocommerceRestApiService : IWoocommerceRestApiService
 
             if (data != null)
             {
-                request.Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
+                request.Content = new StringContent(data, Encoding.UTF8, "application/json");
             }
 
             var response = await _httpClient.SendAsync(request);

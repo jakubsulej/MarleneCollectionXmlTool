@@ -4,6 +4,8 @@ using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Mo
 using MarleneCollectionXmlTool.Domain.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Newtonsoft.Json;
 using System.Xml;
 
 namespace MarleneCollectionXmlTool.Domain.Queries.UploadProductImages;
@@ -63,18 +65,19 @@ public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductIm
 
             var imagesWithNames = new List<ImagesWithNamesDto>();
 
-            foreach (var productIdSkuDict in productIdSkusDict.Where(x => x.Key == 5571).ToList())
+            foreach (var productIdSkuDict in productIdSkusDict)
             {
-                parentSkuImageDict.TryGetValue(productIdSkuDict.Value, out var details);
+                var sku = productIdSkuDict.Value;
+                parentSkuImageDict.TryGetValue(sku, out var details);
                 var productId = productIdSkuDict.Key;
 
                 if (details == (null, null)) continue;
 
-                var imagesWithNameDto = new ImagesWithNamesDto((ulong)productId, details.imageUrls, details.postTitle);
+                var imagesWithNameDto = new ImagesWithNamesDto((ulong)productId, details.imageUrls, details.postTitle, sku);
                 imagesWithNames.Add(imagesWithNameDto);
             }
             
-            var addedImages = await _imageService.AddImagesOnServer(imagesWithNames);
+            await _imageService.DownloadImagesOnLocalMachine(imagesWithNames);
 
             return Result.Ok();
         }
@@ -86,10 +89,12 @@ public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductIm
 
     internal class ProductUpdateData
     {
+        [JsonProperty(PropertyName = "images")]
         public List<ProductImage> Images { get; set; }
 
         internal class ProductImage
         {
+            [JsonProperty(PropertyName = "src")]
             public string Src { get; set; }
         }
     }
