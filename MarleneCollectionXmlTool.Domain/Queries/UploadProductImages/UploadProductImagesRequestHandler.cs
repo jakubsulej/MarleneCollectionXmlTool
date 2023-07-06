@@ -54,10 +54,11 @@ public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductIm
                 parentSkuImageDict.TryAdd(sku, (postTitle, imageurls));
             }
 
-            var parentProductIds = await _dbContext.WpPosts
+            var parentProductNames = await _dbContext.WpPosts
                 .Where(x => x.PostType == "product")
-                .Select(x => (long)x.Id)
-                .ToListAsync(cancellationToken);
+                .ToDictionaryAsync(x => (long)x.Id, x => x.PostName, cancellationToken);
+
+            var parentProductIds = parentProductNames.Keys.ToList();
 
             var productIdSkusDict = await _dbContext.WpWcProductMetaLookups
                 .Where(x => parentProductIds.Contains(x.ProductId))?
@@ -70,10 +71,11 @@ public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductIm
                 var sku = productIdSkuDict.Value;
                 parentSkuImageDict.TryGetValue(sku, out var details);
                 var productId = productIdSkuDict.Key;
+                var postTitle = parentProductNames[productId];
 
                 if (details == (null, null)) continue;
 
-                var imagesWithNameDto = new ImagesWithNamesDto((ulong)productId, details.imageUrls, details.postTitle, sku);
+                var imagesWithNameDto = new ImagesWithNamesDto((ulong)productId, details.imageUrls, postTitle, sku);
                 imagesWithNames.Add(imagesWithNameDto);
             }
             

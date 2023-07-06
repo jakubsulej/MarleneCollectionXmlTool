@@ -155,11 +155,15 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             var variants = (XmlNodeList)null;
             var parentPostId = (ulong)0;
             var variantPostIds = new List<ulong>();
+            var canBeAdded = true;
 
             foreach (XmlNode child in xmlProduct.ChildNodes)
             {
-                if (child.Name == "category" && child.InnerText == "Odzież / Damska / DODATKI") 
+                if (child.Name == "category" && child.InnerText == "Odzież / Damska / DODATKI")
+                {
+                    canBeAdded = false;
                     continue;
+                }      
 
                 if (child.Name == "nazwa") parentProductWpPostDto.PostTitle = child.InnerText.Trim();
                 if (child.Name == "kod_katalogowy") parentProductWpPostDto.Sku = child.InnerText.Trim();
@@ -173,6 +177,9 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                 if (child.Name == "zdjecia") foreach (XmlNode photo in child.ChildNodes) parentProductWpPostDto.ImageUrls?.Add(photo.InnerText.Trim());
                 if (child.Name == "warianty") variants = child.ChildNodes;
             }
+
+            if (canBeAdded == false) 
+                continue;
 
             foreach (XmlNode variant in variants)
             {
