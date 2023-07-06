@@ -5,16 +5,17 @@ namespace MarleneCollectionXmlTool.Domain.Services;
 
 public interface IProductMetaService
 {
-    WpWcProductMetaLookup GenerateParentProductMetaLookup(WpPostDto parentPost);
-    WpWcProductMetaLookup GenerateVariantProductMetaLookup(WpPostDto variantPost);
+    WpWcProductMetaLookup GenerateParentProductMetaLookup(WpPostDto parentPost, ulong productId);
+    WpWcProductMetaLookup GenerateVariantProductMetaLookup(WpPostDto variantPost, ulong productId);
 }
 
 public class ProductMetaService : IProductMetaService
 {
-    public WpWcProductMetaLookup GenerateParentProductMetaLookup(WpPostDto parentPost)
+    public WpWcProductMetaLookup GenerateParentProductMetaLookup(WpPostDto parentPost, ulong productId)
     {
         var metaLookup = new WpWcProductMetaLookup
         {
+            ProductId = (long)productId,
             Sku = parentPost.Sku,
             Virtual = false,
             Downloadable = false,
@@ -33,10 +34,11 @@ public class ProductMetaService : IProductMetaService
         return metaLookup;
     }
 
-    public WpWcProductMetaLookup GenerateVariantProductMetaLookup(WpPostDto variantPost)
+    public WpWcProductMetaLookup GenerateVariantProductMetaLookup(WpPostDto variantPost, ulong productId)
     {
         var metaLookup = new WpWcProductMetaLookup
         {
+            ProductId = (long)productId,
             Sku = variantPost.Sku,
             Virtual = false,
             Downloadable = false,

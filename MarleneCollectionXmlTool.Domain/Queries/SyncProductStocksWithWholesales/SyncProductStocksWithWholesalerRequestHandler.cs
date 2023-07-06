@@ -158,6 +158,9 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
             foreach (XmlNode child in xmlProduct.ChildNodes)
             {
+                if (child.Name == "category" && child.InnerText == "Odzież / Damska / DODATKI") 
+                    continue;
+
                 if (child.Name == "nazwa") parentProductWpPostDto.PostTitle = child.InnerText.Trim();
                 if (child.Name == "kod_katalogowy") parentProductWpPostDto.Sku = child.InnerText.Trim();
                 if (child.Name == "opis") parentProductWpPostDto.PostContent = child.InnerText.Trim();
@@ -314,7 +317,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         var productAttributesString = _productAttributeService.CreateProductAttributesString(parentWpPostDto, variantProducts);
         var terms = _cacheProvider.GetAllWpTerms();
         var (attributesLookups, termRelationships) = await _productAttributeService.MapParentProductTaxonomyValues(parentPostId, parentWpPostDto, variantProducts, terms);
-        var parentMetaLookup = _metaService.GenerateParentProductMetaLookup(parentWpPostDto);
+        var parentMetaLookup = _metaService.GenerateParentProductMetaLookup(parentWpPostDto, parentPostId);
 
         var postMetas = new List<WpPostmetum>
         {
@@ -395,7 +398,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             var taxonomy = await _productAttributeService.MapVariableProductTaxonomyValues(variantPostId, parentPostId, variantWpPostDto, terms);
             var relationships = taxonomy.Relationships;
             var attributeLookups = taxonomy.AttributesLookups;
-            var variantMetaLookup = _metaService.GenerateVariantProductMetaLookup(variantWpPostDto);
+            var variantMetaLookup = _metaService.GenerateVariantProductMetaLookup(variantWpPostDto, variantPostId);
 
             var postMetas = new List<WpPostmetum>
             {
