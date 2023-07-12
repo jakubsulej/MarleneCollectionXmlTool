@@ -7,6 +7,7 @@ using MarleneCollectionXmlTool.Domain.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System.Xml;
 
 namespace MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales;
@@ -24,6 +25,14 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         "_variation_description", "total_sales", "_tax_status", "_tax_class", "_manage_stock", "_backorders", "_sold_individually", "_virtual", "_downloadable",
         "_download_limit", "_download_expiry", "_stock", "_stock_status", "_wc_average_rating", "_wc_review_count", "attribute_kolor", "attribute_rozmiar",
         "uniqid", "_product_version", "import_uid", "import_started_at", "_sku", "_regular_price", "_price"
+    };
+    private readonly string[] _notUpdatableSkus =
+    {
+        "1 - torebka foglia", "1 - plecak marrone"
+    };
+    private readonly string[] _categoriesToSkip =
+    {
+        "Odzież / Damska / DODATKI", "Odzież / Damska / PROMOCJE", "Odzież / Damska / Plus Size"
     };
 
     public SyncProductStocksWithWholesalerRequestHandler(
@@ -91,7 +100,17 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
     private async Task<int> UpdateProductsAndVariantsOutOfStock(
         List<WpPost> parentProducts, List<WpPost> variantProducts, List<WpPostmetum> productMetaDetails, Dictionary<ulong, List<ulong>> syncedProductIdsWithWholesaler)
     {
-        foreach (var item in parentProducts)
+        var notUpdatableProductId = productMetaDetails
+            .Where(x => x.MetaKey == "_sku")
+            .Where(x => _notUpdatableSkus.Contains(x.MetaValue))
+            .Select(x => x.PostId) 
+            .ToList();
+
+        var filteredProducts = parentProducts
+            .Where(x => !notUpdatableProductId.Contains(x.Id))
+            .ToList();
+
+        foreach (var item in filteredProducts)
         {
             syncedProductIdsWithWholesaler.TryGetValue(item.Id, out var syncedVariantWithCatalogIds);
             var variantProductsMissingInWholesalerCatalog = new List<WpPost>();
@@ -155,13 +174,13 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             var variants = (XmlNodeList)null;
             var parentPostId = (ulong)0;
             var variantPostIds = new List<ulong>();
-            var canBeAdded = true;
+            var productCanBeAdded = true;
 
             foreach (XmlNode child in xmlProduct.ChildNodes)
             {
-                if (child.Name == "category" && child.InnerText == "Odzież / Damska / DODATKI")
+                if (child.Name == "category" && _categoriesToSkip.Contains(child.InnerText))
                 {
-                    canBeAdded = false;
+                    productCanBeAdded = false;
                     continue;
                 }      
 
@@ -178,7 +197,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                 if (child.Name == "warianty") variants = child.ChildNodes;
             }
 
-            if (canBeAdded == false) 
+            if (productCanBeAdded == false) 
                 continue;
 
             foreach (XmlNode variant in variants)

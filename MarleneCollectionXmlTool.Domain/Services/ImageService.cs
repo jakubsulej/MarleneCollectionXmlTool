@@ -51,7 +51,7 @@ public class ImageService : IImageService
         var images = new List<ImagesForProductUploadDto>();
 
         foreach (var imageWithName in imagesWithNames)
-         {
+        {
             var productName = imageWithName.FileName.GenerateSlug();
             var productId = imageWithName.ProductId;
 
