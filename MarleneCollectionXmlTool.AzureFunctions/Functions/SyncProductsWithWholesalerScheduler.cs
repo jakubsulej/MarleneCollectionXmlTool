@@ -16,10 +16,10 @@ public class SyncProductsWithWholesalerScheduler
     }
 
     /// <summary>
-    /// 6.00 utc every day
+    /// "0 6,12,18 * * *" = At 06:00, 12:00 and 18:00
     /// </summary>
     [Function("SyncProductsWithHurtIvon")]
-    public async Task SyncProductsWithHurtIvon([TimerTrigger("0 6 * * * *")] SyncProductStocksWithWholesalerRequest request)
+    public async Task SyncProductsWithHurtIvon([TimerTrigger("0 6,12,18 * * *")] SyncProductStocksWithWholesalerRequest request)
     {
         try
         {
