@@ -27,4 +27,32 @@ public struct MetaKeyConstrains
     public const string AttributePaRozmiar = "attribute_pa_rozmiar";
     public const string RegularPrice = "_regular_price";
     public const string ThumbnailId = "_thumbnail_id";
+
+    public static readonly string[] AcceptableMetaKeys =
+    {
+        "_variation_description", 
+        "total_sales", 
+        "_tax_status", 
+        "_tax_class", 
+        "_manage_stock", 
+        "_backorders", 
+        "_sold_individually", 
+        "_virtual", 
+        "_downloadable",
+        "_download_limit", 
+        "_download_expiry", 
+        "_stock", 
+        "_stock_status", 
+        "_wc_average_rating", 
+        "_wc_review_count", 
+        "attribute_kolor", 
+        "attribute_rozmiar",
+        "uniqid", 
+        "_product_version", 
+        "import_uid", 
+        "import_started_at", 
+        "_sku", 
+        "_regular_price", 
+        "_price"
+    };
 }

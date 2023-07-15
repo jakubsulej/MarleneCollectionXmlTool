@@ -20,5 +20,9 @@
   "FtpPassword": "<secret>",
   "FtpServer": "<secret>",
   "DestinationFolder": "<secret>",
-  "SshHostFingerpring": "<secret>"
+  "SshHostFingerpring": "<secret>",
+  "NotUpdatableSkus:0": "<sku0>",
+  "NotUpdatableSkus:1": "<sku1>",
+  "CategoriesToSkip:0": "<category0>",
+  "CategoriesToSkip:1": "<category1>"
 }

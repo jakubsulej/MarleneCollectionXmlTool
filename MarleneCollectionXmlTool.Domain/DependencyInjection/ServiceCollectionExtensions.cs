@@ -1,5 +1,6 @@
 ﻿using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Cache;
+using MarleneCollectionXmlTool.Domain.Helpers;
 using MarleneCollectionXmlTool.Domain.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -56,6 +57,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductMetaService, ProductMetaService>();
         services.AddScoped<IImageService, ImageService>();
         services.AddScoped<IWoocommerceRestApiService, WoocommerceRestApiService>();
+        services.AddSingleton<IConfigurationArrayProvider, ConfigurationArrayProvider>();
 
         //Cache services
         services.AddScoped<ICacheProvider, CacheProvider>();

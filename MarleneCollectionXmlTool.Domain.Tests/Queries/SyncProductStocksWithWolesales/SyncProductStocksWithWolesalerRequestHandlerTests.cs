@@ -2,6 +2,7 @@
 using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
+using MarleneCollectionXmlTool.Domain.Helpers;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Services;
@@ -31,7 +32,8 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         _configuration = A.Fake<IConfiguration>();
         _cacheProvider = A.Fake<ICacheProvider>();
         _propdctMetaService = A.Fake<IProductMetaService>();
-        _sut = new SyncProductStocksWithWholesalerRequestHandler(_wholesalerService, _productAttributeHelper, _propdctMetaService, _cacheProvider, _configuration, _dbContext);
+        var configurationArrayProvider = new ConfigurationArrayProvider(_configuration);
+        _sut = new SyncProductStocksWithWholesalerRequestHandler(_wholesalerService, _productAttributeHelper, configurationArrayProvider, _propdctMetaService, _cacheProvider, _configuration, _dbContext);
     }
 
     /// <summary>D20-ZIELON.xml</summary>
