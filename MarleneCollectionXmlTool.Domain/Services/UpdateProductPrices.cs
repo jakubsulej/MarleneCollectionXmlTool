@@ -14,9 +14,12 @@ public class ProductPriceService
     public ProductPriceService(WoocommerceDbContext dbContext)
     {
         _dbContext = dbContext;
+        _priceMarginFactor = 1.2m;
     }
 
-    public async Task UpdateProductPrices(List<WpPost> parentProducts, List<WpPost> allVariantProducts, List<WpPostmetum> productMetaDetails, XmlNode xmlProducts)
+    public async Task UpdateProductPrices(
+        List<WpPost> parentProducts, List<WpPost> allVariantProducts, 
+        List<WpPostmetum> productMetaDetails, XmlNode xmlProducts)
     {
         var productIds = parentProducts.Select(x => (long)x.Id).ToList();
         productIds.AddRange(allVariantProducts.Select(x => (long)x.Id));
@@ -67,8 +70,8 @@ public class ProductPriceService
         _dbContext.SaveChanges();
     }
 
-    private static (decimal newRegularPrice, decimal? newPromoPrice) GetNewProductPrice(
-        decimal catalogPrice, decimal promoPrice, decimal currentPrice, decimal? currentPromoPrice)
+    private (decimal newRegularPrice, decimal? newPromoPrice) GetNewProductPrice(
+        decimal catalogPrice, decimal? promoPrice, decimal currentPrice, decimal? currentPromoPrice)
     {
         if (catalogPrice == 0 && promoPrice == 0) 
             return (currentPrice, currentPromoPrice);
@@ -76,9 +79,14 @@ public class ProductPriceService
         if (currentPrice != catalogPrice)
             currentPrice = catalogPrice;
 
-        if (currentPromoPrice != null && currentPromoPrice > promoPrice)
+        if (currentPromoPrice != null 
+            && promoPrice != null 
+            && currentPromoPrice > promoPrice * _priceMarginFactor)
             currentPromoPrice = promoPrice;
 
-        return (currentPrice, currentPromoPrice);
+        currentPromoPrice ??= promoPrice;
+
+        var currentPromoPriceWithMargin = currentPromoPrice * _priceMarginFactor;
+        return (currentPrice, currentPromoPriceWithMargin);
     }
 }
