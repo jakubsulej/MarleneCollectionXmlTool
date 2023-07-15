@@ -91,7 +91,10 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
     }
 
     private async Task<int> UpdateProductsAndVariantsOutOfStock(
-        List<WpPost> parentProducts, List<WpPost> variantProducts, List<WpPostmetum> productMetaDetails, Dictionary<ulong, List<ulong>> syncedProductIdsWithWholesaler)
+        List<WpPost> parentProducts, 
+        List<WpPost> variantProducts, 
+        List<WpPostmetum> productMetaDetails, 
+        Dictionary<ulong, List<ulong>> syncedProductIdsWithWholesaler)
     {
         var notUpdatableProductId = productMetaDetails
             .Where(x => x.MetaKey == MetaKeyConstrains.Sku)

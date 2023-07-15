@@ -12,6 +12,7 @@ public struct HurtIvonXmlConstrains
     public const string Wzor = "wzor";
     public const string Rozmiar = "rozmiar";
     public const string CenaKatalogowa = "cena_katalogowa";
+    public const string CenaPromo = "cena_promo";
     public const string Zdjecia = "zdjecia";
     public const string Warianty = "warianty";
     public const string Ean = "ean";

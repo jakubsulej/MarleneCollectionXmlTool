@@ -26,6 +26,7 @@ public struct MetaKeyConstrains
     public const string Downloadable = "_downloadable";
     public const string AttributePaRozmiar = "attribute_pa_rozmiar";
     public const string RegularPrice = "_regular_price";
+    public const string SalePrice = "_sale_price";
     public const string ThumbnailId = "_thumbnail_id";
 
     public static readonly string[] AcceptableMetaKeys =

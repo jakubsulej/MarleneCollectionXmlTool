@@ -3,7 +3,6 @@ using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Helpers;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Utils;
-using System.Collections.Immutable;
 
 namespace MarleneCollectionXmlTool.Domain.Services;
 
