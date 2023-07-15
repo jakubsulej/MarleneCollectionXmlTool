@@ -20,10 +20,10 @@ public class SyncProductsWithWholesalerScheduler
     }
 
     /// <summary>
-    /// "0 6,12,18 * * * *" = At 06:00, 12:00 and 18:00
+    /// "0 0 */6 * * *" every 6 hours run
     /// </summary>
     [Function("SyncProductsWithHurtIvon")]
-    public async Task SyncProductsWithHurtIvon([TimerTrigger("0 6,12,18 * * * *")] SyncProductStocksWithWholesalerRequest request)
+    public async Task SyncProductsWithHurtIvon([TimerTrigger("0 0 */6 * * *")] SyncProductStocksWithWholesalerRequest request)
     {
         //_logger.LogInformation($"{nameof(SyncProductsWithWholesalerScheduler)} has started");
         var sw = new Stopwatch();

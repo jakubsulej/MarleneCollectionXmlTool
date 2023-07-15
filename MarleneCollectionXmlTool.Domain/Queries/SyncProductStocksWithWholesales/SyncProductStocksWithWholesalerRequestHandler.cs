@@ -4,10 +4,10 @@ using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Services;
+using MarleneCollectionXmlTool.Domain.Utils;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System.Xml;
 
 namespace MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales;
@@ -78,7 +78,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                 .Where(x => _metaKeys.Contains(x.MetaKey))
                 .ToListAsync(cancellationToken);
 
-            var xmlProducts = xmlDoc.GetElementsByTagName("produkt");
+            var xmlProducts = xmlDoc.GetElementsByTagName(HurtIvonXmlConstrains.Produkt);
 
             var syncedPostIdsWithWholesaler = await SyncXmlProductsWithWoocommerceDb(
                 parentProducts, productMetaDetails, xmlProducts, cancellationToken);
@@ -101,7 +101,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         List<WpPost> parentProducts, List<WpPost> variantProducts, List<WpPostmetum> productMetaDetails, Dictionary<ulong, List<ulong>> syncedProductIdsWithWholesaler)
     {
         var notUpdatableProductId = productMetaDetails
-            .Where(x => x.MetaKey == "_sku")
+            .Where(x => x.MetaKey == MetaKeyConstrains.Sku)
             .Where(x => _notUpdatableSkus.Contains(x.MetaValue))
             .Select(x => x.PostId) 
             .ToList();
@@ -121,7 +121,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             {
                 var parentProductMeta = productMetaDetails?
                     .Where(x => x.PostId == item.Id)?
-                    .Where(x => x.MetaKey == "_stock_status")?
+                    .Where(x => x.MetaKey == MetaKeyConstrains.StockStatus)?
                     .FirstOrDefault();
 
                 if (parentProductMeta == null) continue;
@@ -149,12 +149,12 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                     .ToList();
 
                 if (variantProductMeta.Any() == false 
-                    || variantProductMeta.Any(x => x.MetaKey == "_stock") == false
-                    || variantProductMeta.Any(x => x.MetaKey == "_stock_status") == false) 
+                    || variantProductMeta.Any(x => x.MetaKey == MetaKeyConstrains.Stock) == false
+                    || variantProductMeta.Any(x => x.MetaKey == MetaKeyConstrains.StockStatus) == false) 
                     continue;
 
-                variantProductMeta.FirstOrDefault(x => x.MetaKey == "_stock").MetaValue = "0";
-                variantProductMeta.FirstOrDefault(x => x.MetaKey == "_stock_status").MetaValue = "outofstock";
+                variantProductMeta.FirstOrDefault(x => x.MetaKey == MetaKeyConstrains.Stock).MetaValue = "0";
+                variantProductMeta.FirstOrDefault(x => x.MetaKey == MetaKeyConstrains.StockStatus).MetaValue = "outofstock";
             }
         }
 
@@ -184,17 +184,17 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                     continue;
                 }      
 
-                if (child.Name == "nazwa") parentProductWpPostDto.PostTitle = child.InnerText.Trim();
-                if (child.Name == "kod_katalogowy") parentProductWpPostDto.Sku = child.InnerText.Trim();
-                if (child.Name == "opis") parentProductWpPostDto.PostContent = child.InnerText.Trim();
-                if (child.Name == "kolor") parentProductWpPostDto.AttributeKolor = child.InnerText.Trim();
-                if (child.Name == "fason") parentProductWpPostDto.AttributeFason = child.InnerText.Trim();
-                if (child.Name == "dlugosc") parentProductWpPostDto.AttributeDlugosc = child.InnerText.Trim();
-                if (child.Name == "wzor") parentProductWpPostDto.AttributeWzor = child.InnerText.Trim();
-                if (child.Name == "rozmiar") parentProductWpPostDto.AttributeRozmiar = child.InnerText.Trim();
-                if (child.Name == "cena_katalogowa") parentProductWpPostDto.RegularPrice = child.InnerText.Trim();
-                if (child.Name == "zdjecia") foreach (XmlNode photo in child.ChildNodes) parentProductWpPostDto.ImageUrls?.Add(photo.InnerText.Trim());
-                if (child.Name == "warianty") variants = child.ChildNodes;
+                if (child.Name == HurtIvonXmlConstrains.Nazwa) parentProductWpPostDto.PostTitle = child.InnerText.Trim();
+                if (child.Name == HurtIvonXmlConstrains.KodKatalogowy) parentProductWpPostDto.Sku = child.InnerText.Trim();
+                if (child.Name == HurtIvonXmlConstrains.Opis) parentProductWpPostDto.PostContent = child.InnerText.Trim();
+                if (child.Name == HurtIvonXmlConstrains.Kolor) parentProductWpPostDto.AttributeKolor = child.InnerText.Trim();
+                if (child.Name == HurtIvonXmlConstrains.Fason) parentProductWpPostDto.AttributeFason = child.InnerText.Trim();
+                if (child.Name == HurtIvonXmlConstrains.Dlugosc) parentProductWpPostDto.AttributeDlugosc = child.InnerText.Trim();
+                if (child.Name == HurtIvonXmlConstrains.Wzor) parentProductWpPostDto.AttributeWzor = child.InnerText.Trim();
+                if (child.Name == HurtIvonXmlConstrains.Rozmiar) parentProductWpPostDto.AttributeRozmiar = child.InnerText.Trim();
+                if (child.Name == HurtIvonXmlConstrains.CenaKatalogowa) parentProductWpPostDto.RegularPrice = child.InnerText.Trim();
+                if (child.Name == HurtIvonXmlConstrains.Zdjecia) foreach (XmlNode photo in child.ChildNodes) parentProductWpPostDto.ImageUrls?.Add(photo.InnerText.Trim());
+                if (child.Name == HurtIvonXmlConstrains.Warianty) variants = child.ChildNodes;
             }
 
             if (productCanBeAdded == false) 
@@ -206,9 +206,9 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
                 foreach (XmlNode child in variant.ChildNodes)
                 {
-                    if (child.Name == "ean") variantProductWpPostDto.Sku = child.InnerText.Trim();
-                    if (child.Name == "rozmiar") variantProductWpPostDto.AttributeRozmiar = child.InnerText.Trim();
-                    if (child.Name == "dostepna_ilosc") variantProductWpPostDto.Stock = child.InnerText.Trim();
+                    if (child.Name == HurtIvonXmlConstrains.Ean) variantProductWpPostDto.Sku = child.InnerText.Trim();
+                    if (child.Name == HurtIvonXmlConstrains.Rozmiar) variantProductWpPostDto.AttributeRozmiar = child.InnerText.Trim();
+                    if (child.Name == HurtIvonXmlConstrains.DostepnaIlosc) variantProductWpPostDto.Stock = child.InnerText.Trim();
                 }
 
                 if (string.IsNullOrEmpty(variantProductWpPostDto.Sku))
@@ -226,14 +226,14 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                 else if (IsNewVariantInExistingParent(productMetaDetails, variantProductWpPostDto))
                 {
                     parentPostId = productMetaDetails
-                        .Where(x => x.MetaKey == "_sku")
+                        .Where(x => x.MetaKey == MetaKeyConstrains.Sku)
                         .Where(x => x.MetaValue == parentProductWpPostDto.Sku)
                         .First()
                         .PostId;
 
                     var parentPost = parentProducts.First(x => x.Id == parentPostId);
                     var regularPrice = productMetaDetails?
-                        .FirstOrDefault(x => x.PostId == parentPostId && x.MetaKey == "_price")?
+                        .FirstOrDefault(x => x.PostId == parentPostId && x.MetaKey == MetaKeyConstrains.Price)?
                         .MetaValue ?? "0";
 
                     variantProductWpPostDto.PostTitle = parentPost.PostTitle;
@@ -243,7 +243,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                 else //Only update existing variant
                 {
                     var variantPostId = productMetaDetails
-                        .Where(x => x.MetaKey == "_sku")
+                        .Where(x => x.MetaKey == MetaKeyConstrains.Sku)
                         .Where(x => x.MetaValue == variantProductWpPostDto.Sku)
                         .First()
                         .PostId;
@@ -254,8 +254,8 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                         .Where(x => x.PostId == variantPostId)?
                         .ToList();
 
-                    variantProductMeta.First(x => x.MetaKey == "_stock").MetaValue = variantProductWpPostDto.Stock;
-                    variantProductMeta.First(x => x.MetaKey == "_stock_status").MetaValue = variantProductWpPostDto.StockStatus;
+                    variantProductMeta.First(x => x.MetaKey == MetaKeyConstrains.Stock).MetaValue = variantProductWpPostDto.Stock;
+                    variantProductMeta.First(x => x.MetaKey == MetaKeyConstrains.StockStatus).MetaValue = variantProductWpPostDto.StockStatus;
                 }
             }
 
@@ -272,7 +272,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             else //Only update existing parent
             {
                 parentPostId = productMetaDetails
-                    .Where(x => x.MetaKey == "_sku")
+                    .Where(x => x.MetaKey == MetaKeyConstrains.Sku)
                     .Where(x => x?.MetaValue == parentProductWpPostDto.Sku)
                     .First()
                     .PostId;
@@ -281,7 +281,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                     .Where(x => x.PostId == parentPostId)?
                     .ToList();
 
-                parentProductMeta.First(x => x.MetaKey == "_stock_status").MetaValue = parentProductWpPostDto.StockStatus;
+                parentProductMeta.First(x => x.MetaKey == MetaKeyConstrains.StockStatus).MetaValue = parentProductWpPostDto.StockStatus;
                 
                 var newVariantPostIds = await StoreNewVariantProducts(missingVariantsWpPostDtos, parentPostId, cancellationToken);
                 variantPostIds.AddRange(newVariantPostIds);
@@ -294,14 +294,14 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
     }
 
     private static bool IsNewParent(List<WpPostmetum> productMetaDetails, WpPostDto parentProductWpPostDto) 
-        => !productMetaDetails.Any(x => x.MetaKey == "_sku" && x.MetaValue == parentProductWpPostDto.Sku);
+        => !productMetaDetails.Any(x => x.MetaKey == MetaKeyConstrains.Sku && x.MetaValue == parentProductWpPostDto.Sku);
 
     private static bool IsNewVariantInExistingParent(List<WpPostmetum> productMetaDetails, WpPostDto variantProductWpPostDto) 
-        => !productMetaDetails.Any(x => x.MetaKey == "_sku" && x.MetaValue == variantProductWpPostDto.Sku);
+        => !productMetaDetails.Any(x => x.MetaKey == MetaKeyConstrains.Sku && x.MetaValue == variantProductWpPostDto.Sku);
 
     private static bool IsNewVariantInNewParent(List<WpPostmetum> productMetaDetails, WpPostDto parentProductWpPostDto, WpPostDto variantProductWpPostDto) 
-        => !(productMetaDetails.Any(x => x.MetaKey == "_sku" && x.MetaValue == variantProductWpPostDto.Sku)
-            || productMetaDetails.Any(x => x.MetaKey == "_sku" && x.MetaValue == parentProductWpPostDto.Sku));
+        => !(productMetaDetails.Any(x => x.MetaKey == MetaKeyConstrains.Sku && x.MetaValue == variantProductWpPostDto.Sku)
+            || productMetaDetails.Any(x => x.MetaKey == MetaKeyConstrains.Sku && x.MetaValue == parentProductWpPostDto.Sku));
 
     private async Task<ulong> StoreNewParentProduct(
         WpPostDto parentWpPostDto, 
@@ -347,28 +347,26 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
         var postMetas = new List<WpPostmetum>
         {
-            new WpPostmetum(parentPostId, "_sku", parentWpPostDto.Sku),
-            new WpPostmetum(parentPostId, "total_sales", "0"),
-            new WpPostmetum(parentPostId, "_tax_status", "taxable"),
-            new WpPostmetum(parentPostId, "_tax_class", string.Empty),
-            new WpPostmetum(parentPostId, "_manage_stock", "no"),
-            new WpPostmetum(parentPostId, "_backorders", "no"),
-            new WpPostmetum(parentPostId, "_sold_individually", "no"),
-            new WpPostmetum(parentPostId, "_virtual", "no"),
-            new WpPostmetum(parentPostId, "_download_limit", "-1"),
-            new WpPostmetum(parentPostId, "_download_expiry", "-1"),
-            new WpPostmetum(parentPostId, "_stock", null),
-            new WpPostmetum(parentPostId, "_stock_status", parentWpPostDto.StockStatus),
-            new WpPostmetum(parentPostId, "_wc_average_rating", "0"),
-            new WpPostmetum(parentPostId, "_wc_review_count", "0"),
-            new WpPostmetum(parentPostId, "_product_attributes", productAttributesString),
-            new WpPostmetum(parentPostId, "_product_version", "7.7.0"),
-            new WpPostmetum(parentPostId, "has_parent", "no"),
-            new WpPostmetum(parentPostId, "resync", "yes"),
-            new WpPostmetum(parentPostId, "_woosea_exclude_product", "no"),
-            new WpPostmetum(parentPostId, "_price", (decimal.Parse(parentWpPostDto.RegularPrice)).ToString("0")),
-            //new WpPostmetum(postId, "_thumbnail_id", "5832"),
-            //new WpPostmetum(postId, "_product_image_gallery", "5833,5835,5834"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.Sku, parentWpPostDto.Sku),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.TotalSales, "0"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.TaxStatus, "taxable"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.TaxClass, string.Empty),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.ManageStock, "no"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.Backorders, "no"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.SoldIndividually, "no"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.Virtual, "no"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.DownloadLimit, "-1"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.DownloadExpiry, "-1"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.Stock, null),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.StockStatus, parentWpPostDto.StockStatus),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.WcAverageRating, "0"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.WcReviewCount, "0"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.ProductAttributes, productAttributesString),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.ProductVersion, "7.7.0"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.HasParent, "no"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.Resync, "yes"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.WooseaExcludeProduct, "no"),
+            new WpPostmetum(parentPostId, MetaKeyConstrains.Price, (decimal.Parse(parentWpPostDto.RegularPrice)).ToString("0")),
         };
 
         await _dbContext.WpPostmeta.AddRangeAsync(postMetas, cancellationToken);
@@ -428,27 +426,27 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
             var postMetas = new List<WpPostmetum>
             {
-                new WpPostmetum(variantPostId, "_variation_description", string.Empty),
-                new WpPostmetum(variantPostId, "total_sales", "0"),
-                new WpPostmetum(variantPostId, "_tax_status", "taxable"),
-                new WpPostmetum(variantPostId, "_tax_class", "parent"),
-                new WpPostmetum(variantPostId, "_manage_stock", "yes"),
-                new WpPostmetum(variantPostId, "_backorders", "no"),
-                new WpPostmetum(variantPostId, "_sold_individually", "no"),
-                new WpPostmetum(variantPostId, "_virtual", "no"),
-                new WpPostmetum(variantPostId, "_downloadable", "no"),
-                new WpPostmetum(variantPostId, "_download_limit", "-1"),
-                new WpPostmetum(variantPostId, "_download_expiry", "-1"),
-                new WpPostmetum(variantPostId, "_stock", variantWpPostDto.Stock),
-                new WpPostmetum(variantPostId, "_stock_status", variantWpPostDto.StockStatus),
-                new WpPostmetum(variantPostId, "_wc_average_rating", "0"),
-                new WpPostmetum(variantPostId, "_wc_review_count", "0"),
-                new WpPostmetum(variantPostId, "attribute_pa_rozmiar", variantWpPostDto.AttributeRozmiar.Replace(" ", "-").Replace("/", "-").ToLower()),
-                new WpPostmetum(variantPostId, "_product_version", "7.7.0"),
-                new WpPostmetum(variantPostId, "_sku", variantWpPostDto.Sku),
-                new WpPostmetum(variantPostId, "_regular_price", (decimal.Parse(variantWpPostDto.RegularPrice)).ToString("0")),
-                new WpPostmetum(variantPostId, "_thumbnail_id", "0"),
-                new WpPostmetum(variantPostId, "_price", (decimal.Parse(variantWpPostDto.RegularPrice)).ToString("0")),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.VariantDescription, string.Empty),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.TotalSales, "0"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.TaxStatus, "taxable"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.TaxClass, "parent"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.ManageStock, "yes"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.Backorders, "no"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.SoldIndividually, "no"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.Virtual, "no"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.Downloadable, "no"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.DownloadLimit, "-1"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.DownloadExpiry, "-1"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.Stock, variantWpPostDto.Stock),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.StockStatus, variantWpPostDto.StockStatus),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.WcAverageRating, "0"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.WcReviewCount, "0"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.AttributePaRozmiar, variantWpPostDto.AttributeRozmiar.Replace(" ", "-").Replace("/", "-").ToLower()),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.ProductVersion, "7.7.0"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.Sku, variantWpPostDto.Sku),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.RegularPrice, (decimal.Parse(variantWpPostDto.RegularPrice)).ToString("0")),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.ThumbnailId, "0"),
+                new WpPostmetum(variantPostId, MetaKeyConstrains.Price, (decimal.Parse(variantWpPostDto.RegularPrice)).ToString("0")),
             };
 
             await _dbContext.WpPostmeta.AddRangeAsync(postMetas, cancellationToken);
