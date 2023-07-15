@@ -178,7 +178,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
             foreach (XmlNode child in xmlProduct.ChildNodes)
             {
-                if (child.Name == "category" && _categoriesToSkip.Contains(child.InnerText))
+                if (child.Name == HurtIvonXmlConstrains.Category && _categoriesToSkip.Contains(child.InnerText))
                 {
                     productCanBeAdded = false;
                     continue;

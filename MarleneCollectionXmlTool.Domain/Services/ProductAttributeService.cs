@@ -2,6 +2,7 @@
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Helpers;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
+using MarleneCollectionXmlTool.Domain.Utils;
 using System.Collections.Immutable;
 
 namespace MarleneCollectionXmlTool.Domain.Services;
@@ -278,15 +279,15 @@ public class ProductAttributeService : IProductAttributeService
                 if (string.IsNullOrEmpty(attribute)) continue;
 
                 var attributeName = attribute.ToUpper();
-                if (attribute.ToUpper() == "GREEN") attributeName = "ZIELONY";
-                if (attribute.ToUpper() == "CREAM") attributeName = "ECRU";
-                if (attribute.ToUpper() == "CZARNA") attributeName = "CZARNY";
-                if (attribute.ToUpper() == "W PASKI") attributeName = "PASKI";
-                if (attribute.ToUpper() == "ŚMIETANKOWY") attributeName = "ECRU";
-                if (attribute.ToUpper() == "DŁUGI RĘKAW") attributeName = "DŁUGIE";
-                if (attribute.ToUpper() == "RĘKAW ¾") attributeName = "RĘKAW 3/4";
-                if (attribute.ToUpper() == "CZARNO-BIAŁY") attributeName = "BIAŁO-CZARNY";
-                if (attribute.ToUpper() == "W PEPITKĘ") attributeName = "PEPITKA";
+                if (attributeName == HurtIvonXmlConstrains.Green) attributeName = "ZIELONY";
+                if (attributeName == HurtIvonXmlConstrains.Cream) attributeName = "ECRU";
+                if (attributeName == HurtIvonXmlConstrains.Czarna) attributeName = "CZARNY";
+                if (attributeName == HurtIvonXmlConstrains.WPaski) attributeName = "PASKI";
+                if (attributeName == HurtIvonXmlConstrains.Smietankowy) attributeName = "ECRU";
+                if (attributeName == HurtIvonXmlConstrains.DlugiRekaw) attributeName = "DŁUGIE";
+                if (attributeName == HurtIvonXmlConstrains.Rekaw3_4) attributeName = "RĘKAW 3/4";
+                if (attributeName == HurtIvonXmlConstrains.CzarnoBialy) attributeName = "BIAŁO-CZARNY";
+                if (attributeName == HurtIvonXmlConstrains.WPepitke) attributeName = "PEPITKA";
 
                 var taxonomyId = terms?
                     .Where(x => x.Name.ToUpper() == attributeName)

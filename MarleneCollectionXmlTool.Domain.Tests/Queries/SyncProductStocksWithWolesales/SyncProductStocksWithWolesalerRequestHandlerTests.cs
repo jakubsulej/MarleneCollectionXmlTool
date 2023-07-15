@@ -42,8 +42,11 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         var expectedParentSku = "D20-ZIELON";
         var cancellationToken = new CancellationToken();
 
-        var originalWpPosts = MockDataHelper.GetFakeProductWithVariations();
+        var originalWpPostsWithMetas = MockDataHelper.GetFakeProductWithVariations();
+        var originalWpPosts = originalWpPostsWithMetas.Select(x => x.WpPost).ToList();
+        var originalWpMetas = originalWpPostsWithMetas.SelectMany(x => x.WpPostmetum).ToList();
         _dbContext.SeedRange(originalWpPosts);
+        _dbContext.SeedRange(originalWpMetas);
 
         var xmlDocument = XmlTestHelper.GetXmlDocumentFromStaticFile(expectedParentSku);
         A.CallTo(() => _wholesalerService.GetXmlDocumentNestedVariantsXmlUrl(A<CancellationToken>._)).Returns(xmlDocument);
@@ -77,11 +80,11 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         Assert.Equal("instock", parentStockStatus);
 
         var variantDetails = GetVariantDetails(wpMetas, parentPost, variantPosts, skus);
-        AssertVariantDetails("dummy post title", "dummy post name", 38, "instock", "XS/S", 123, "5908214227099", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 3, "instock", "M/L", 123, "5908214227082", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 11, "instock", "XL/XXL", 123, "5908214231799", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 2, "instock", "3XL/4XL", 123, "590821423180", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 8, "instock", "5XL/6XL", 123, "5908214231812", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 38, "instock", "xs-s", 123, "5908214227099", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 3, "instock", "m-l", 123, "5908214227082", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 11, "instock", "xl-xxl", 123, "5908214231799", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 2, "instock", "3xl-4xl", 123, "590821423180", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 8, "instock", "5xl-6xl", 123, "5908214231812", variantDetails);
     }
 
     /// <summary>D20-ZIELON.xml</summary>
@@ -92,10 +95,14 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         var expectedParentSku = "D20-ZIELON";
         var cancellationToken = new CancellationToken();
 
-        var originalWpPosts = MockDataHelper.GetFakeProductWithVariations();
-        originalWpPosts.Remove(originalWpPosts.First(x => x.Id == 6));
-        originalWpPosts.Remove(originalWpPosts.First(x => x.Id == 5));
+        var originalWpPostsWithMetas = MockDataHelper.GetFakeProductWithVariations();
+        originalWpPostsWithMetas.Remove(originalWpPostsWithMetas.First(x => x.WpPost.Id == 6));
+        originalWpPostsWithMetas.Remove(originalWpPostsWithMetas.First(x => x.WpPost.Id == 5));
+
+        var originalWpPosts = originalWpPostsWithMetas.Select(x => x.WpPost).ToList();
+        var originalWpMetas = originalWpPostsWithMetas.SelectMany(x => x.WpPostmetum).ToList();
         _dbContext.SeedRange(originalWpPosts);
+        _dbContext.SeedRange(originalWpMetas);
 
         var xmlDocument = XmlTestHelper.GetXmlDocumentFromStaticFile(expectedParentSku);
         A.CallTo(() => _wholesalerService.GetXmlDocumentNestedVariantsXmlUrl(A<CancellationToken>._)).Returns(xmlDocument);
@@ -129,11 +136,11 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         Assert.Equal("instock", parentStockStatus);
 
         var variantDetails = GetVariantDetails(wpMetas, parentPost, variantPosts, skus);
-        AssertVariantDetails("dummy post title", "dummy post name", 38, "instock", "XS/S", 123, "5908214227099", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 3, "instock", "M/L", 123, "5908214227082", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 11, "instock", "XL/XXL", 123, "5908214231799", variantDetails);
-        AssertVariantDetails("dummy post title - 3XL/4XL", "dummy-post-title-3xl-4xl", 2, "instock", "3XL/4XL", 123, "590821423180", variantDetails);
-        AssertVariantDetails("dummy post title - 5XL/6XL", "dummy-post-title-5xl-6xl", 8, "instock", "5XL/6XL", 123, "5908214231812", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 38, "instock", "xs-s", 123, "5908214227099", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 3, "instock", "m-l", 123, "5908214227082", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 11, "instock", "xl-xxl", 123, "5908214231799", variantDetails);
+        AssertVariantDetails("dummy post title - 3XL/4XL", "dummy-post-title-3xl-4xl", 2, "instock", "3xl-4xl", 123, "590821423180", variantDetails);
+        AssertVariantDetails("dummy post title - 5XL/6XL", "dummy-post-title-5xl-6xl", 8, "instock", "5xl-6xl", 123, "5908214231812", variantDetails);
     }
 
     /// <summary>D20-ZIELON.xml</summary>
@@ -176,11 +183,11 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         Assert.Equal("instock", parentStockStatus);
 
         var variantDetails = GetVariantDetails(wpMetas, parentPost, variantPosts, skus);
-        AssertVariantDetails("Komplet dresowy LOUIS - XS/S", "komplet-dresowy-louis-xs-s", 38, "instock", "XS/S", 199, "5908214227099", variantDetails);
-        AssertVariantDetails("Komplet dresowy LOUIS - M/L", "komplet-dresowy-louis-m-l", 3, "instock", "M/L", 199, "5908214227082", variantDetails);
-        AssertVariantDetails("Komplet dresowy LOUIS - XL/XXL", "komplet-dresowy-louis-xl-xxl", 11, "instock", "XL/XXL", 199, "5908214231799", variantDetails);
-        AssertVariantDetails("Komplet dresowy LOUIS - 3XL/4XL", "komplet-dresowy-louis-3xl-4xl", 2, "instock", "3XL/4XL", 199, "590821423180", variantDetails);
-        AssertVariantDetails("Komplet dresowy LOUIS - 5XL/6XL", "komplet-dresowy-louis-5xl-6xl", 8, "instock", "5XL/6XL", 199, "5908214231812", variantDetails);
+        AssertVariantDetails("Komplet dresowy LOUIS - XS/S", "komplet-dresowy-louis-xs-s", 38, "instock", "xs-s", 199, "5908214227099", variantDetails);
+        AssertVariantDetails("Komplet dresowy LOUIS - M/L", "komplet-dresowy-louis-m-l", 3, "instock", "m-l", 199, "5908214227082", variantDetails);
+        AssertVariantDetails("Komplet dresowy LOUIS - XL/XXL", "komplet-dresowy-louis-xl-xxl", 11, "instock", "xl-xxl", 199, "5908214231799", variantDetails);
+        AssertVariantDetails("Komplet dresowy LOUIS - 3XL/4XL", "komplet-dresowy-louis-3xl-4xl", 2, "instock", "3xl-4xl", 199, "590821423180", variantDetails);
+        AssertVariantDetails("Komplet dresowy LOUIS - 5XL/6XL", "komplet-dresowy-louis-5xl-6xl", 8, "instock", "5xl-6xl", 199, "5908214231812", variantDetails);
     }
 
     /// <summary>D20-ZIELON-LessVariants.xml</summary>
@@ -191,8 +198,11 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         var expectedParentSku = "D20-ZIELON";
         var cancellationToken = new CancellationToken();
 
-        var originalWpPosts = MockDataHelper.GetFakeProductWithVariations();
+        var originalWpPostsWithMetas = MockDataHelper.GetFakeProductWithVariations();
+        var originalWpPosts = originalWpPostsWithMetas.Select(x => x.WpPost).ToList();
+        var originalWpMetas = originalWpPostsWithMetas.SelectMany(x => x.WpPostmetum).ToList();
         _dbContext.SeedRange(originalWpPosts);
+        _dbContext.SeedRange(originalWpMetas);
 
         var xmlDocument = XmlTestHelper.GetXmlDocumentFromStaticFile("D20-ZIELON-LessVariants");
         A.CallTo(() => _wholesalerService.GetXmlDocumentNestedVariantsXmlUrl(A<CancellationToken>._)).Returns(xmlDocument);
@@ -226,11 +236,11 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         Assert.Equal("instock", parentStockStatus);
 
         var variantDetails = GetVariantDetails(wpMetas, parentPost, variantPosts, skus);
-        AssertVariantDetails("dummy post title", "dummy post name", 38, "instock", "XS/S", 123, "5908214227099", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "M/L", 123, "5908214227082", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "XL/XXL", 123, "5908214231799", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "3XL/4XL", 123, "590821423180", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "5XL/6XL", 123, "5908214231812", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 38, "instock", "xs-s", 123, "5908214227099", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "m-l", 123, "5908214227082", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "xl-xxl", 123, "5908214231799", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "3xl-4xl", 123, "590821423180", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "5xl-6xl", 123, "5908214231812", variantDetails);
     }
 
     /// <summary>D8-BORDO.xml</summary>
@@ -240,8 +250,11 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         //Arrange
         var cancellationToken = new CancellationToken();
 
-        var originalWpPosts = MockDataHelper.GetFakeProductWithVariations();
+        var originalWpPostsWithMetas = MockDataHelper.GetFakeProductWithVariations();
+        var originalWpPosts = originalWpPostsWithMetas.Select(x => x.WpPost).ToList();
+        var originalWpMetas = originalWpPostsWithMetas.SelectMany(x => x.WpPostmetum).ToList();
         _dbContext.SeedRange(originalWpPosts);
+        _dbContext.SeedRange(originalWpMetas);
 
         var xmlDocument = XmlTestHelper.GetXmlDocumentFromStaticFile("D8-BORDO");
         A.CallTo(() => _wholesalerService.GetXmlDocumentNestedVariantsXmlUrl(A<CancellationToken>._)).Returns(xmlDocument);
@@ -277,11 +290,11 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         Assert.Equal("outofstock", parentStockStatus);
 
         var variantDetails = GetVariantDetails(wpMetas, parentPost, variantPosts, skus);
-        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "XS/S", 123, "5908214227099", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "M/L", 123, "5908214227082", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "XL/XXL", 123, "5908214231799", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "3XL/4XL", 123, "590821423180", variantDetails);
-        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "5XL/6XL", 123, "5908214231812", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "xs-s", 123, "5908214227099", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "m-l", 123, "5908214227082", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "xl-xxl", 123, "5908214231799", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "3xl-4xl", 123, "590821423180", variantDetails);
+        AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "5xl-6xl", 123, "5908214231812", variantDetails);
     }
 
     private static void AssertVariantDetails(
@@ -308,7 +321,7 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
             var variantMeta = wpMetas?.Where(x => x.PostId == sku.Key).ToList();
             var stock = int.Parse(variantMeta!.FirstOrDefault(x => x.MetaKey == "_stock")!.MetaValue);
             var variantStockStatus = variantMeta!.FirstOrDefault(x => x.MetaKey == "_stock_status")!.MetaValue;
-            var attributeRozmiar = variantMeta!.FirstOrDefault(x => x.MetaKey == "attribute_rozmiar")!.MetaValue;
+            var attributeRozmiar = variantMeta!.FirstOrDefault(x => x.MetaKey == "attribute_pa_rozmiar")!.MetaValue;
             var variantPrice = decimal.Parse(variantMeta!.FirstOrDefault(x => x.MetaKey == "_price")!.MetaValue);
             variantDetails.Add(sku.Value, new(postTitle, postName, stock, variantStockStatus, attributeRozmiar, variantPrice));
         }

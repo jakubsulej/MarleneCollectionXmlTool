@@ -38,8 +38,8 @@ public class ProductAttributeHelperTests
         //Assert
         Assert.NotNull(response);
         Assert.Equal(
-            "a:5:{s:7:\"rozmiar\";a:6:{s:4:\"name\";s:7:\"Rozmiar\";s:5:\"value\";s:17:\"34 | 36 | 38 | 40\";s:8:\"position\";i:0;s:10:\"is_visible\";i:1;s:12:\"is_variation\";i:1;s:11:\"is_taxonomy\";i:0;}s:8:\"pa_kolor\";a:6:{s:4:\"name\";s:8:\"pa_kolor\";s:5:\"value\";s:0:\"\";s:8:\"position\";i:1;s:10:\"is_visible\";i:1;s:12:\"is_variation\";i:0;s:11:\"is_taxonomy\";i:1;}s:8:\"pa_fason\";a:6:{s:4:\"name\";s:8:\"pa_fason\";s:5:\"value\";s:0:\"\";s:8:\"position\";i:2;s:10:\"is_visible\";i:1;s:12:\"is_variation\";i:0;s:11:\"is_taxonomy\";i:1;}s:10:\"pa_dlugosc\";a:6:{s:4:\"name\";s:10:\"pa_dlugosc\";s:5:\"value\";s:0:\"\";s:8:\"position\";i:3;s:10:\"is_visible\";i:1;s:12:\"is_variation\";i:0;s:11:\"is_taxonomy\";i:1;}s:7:\"pa_wzor\";a:6:{s:4:\"name\";s:7:\"pa_wzor\";s:5:\"value\";s:0:\"\";s:8:\"position\";i:4;s:10:\"is_visible\";i:1;s:12:\"is_variation\";i:0;s:11:\"is_taxonomy\";i:1;}}"
-            ,response);
+            "a:5:{s:10:\"pa_rozmiar\";a:6:{s:4:\"name\";s:10:\"pa_rozmiar\";s:5:\"value\";s:0:\"\";s:8:\"position\";i:0;s:10:\"is_visible\";i:1;s:12:\"is_variation\";i:1;s:11:\"is_taxonomy\";i:1;}s:8:\"pa_kolor\";a:6:{s:4:\"name\";s:8:\"pa_kolor\";s:5:\"value\";s:0:\"\";s:8:\"position\";i:1;s:10:\"is_visible\";i:1;s:12:\"is_variation\";i:0;s:11:\"is_taxonomy\";i:1;}s:8:\"pa_fason\";a:6:{s:4:\"name\";s:8:\"pa_fason\";s:5:\"value\";s:0:\"\";s:8:\"position\";i:2;s:10:\"is_visible\";i:1;s:12:\"is_variation\";i:0;s:11:\"is_taxonomy\";i:1;}s:10:\"pa_dlugosc\";a:6:{s:4:\"name\";s:10:\"pa_dlugosc\";s:5:\"value\";s:0:\"\";s:8:\"position\";i:3;s:10:\"is_visible\";i:1;s:12:\"is_variation\";i:0;s:11:\"is_taxonomy\";i:1;}s:7:\"pa_wzor\";a:6:{s:4:\"name\";s:7:\"pa_wzor\";s:5:\"value\";s:0:\"\";s:8:\"position\";i:4;s:10:\"is_visible\";i:1;s:12:\"is_variation\";i:0;s:11:\"is_taxonomy\";i:1;}}"
+            , response);
     }
 
     [Fact]

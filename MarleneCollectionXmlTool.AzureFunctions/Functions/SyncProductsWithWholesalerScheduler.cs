@@ -25,13 +25,10 @@ public class SyncProductsWithWholesalerScheduler
     [Function("SyncProductsWithHurtIvon")]
     public async Task SyncProductsWithHurtIvon([TimerTrigger("0 0 */6 * * *")] SyncProductStocksWithWholesalerRequest request)
     {
-        //_logger.LogInformation($"{nameof(SyncProductsWithWholesalerScheduler)} has started");
         var sw = new Stopwatch();
-
         try
         {
             var result = await _mediator.Send(request);
-            //_logger.LogInformation($"{nameof(SyncProductsWithWholesalerScheduler)} has finished at {DateTime.Now} in {sw.Elapsed}");
         }
         catch (Exception ex)
         {
