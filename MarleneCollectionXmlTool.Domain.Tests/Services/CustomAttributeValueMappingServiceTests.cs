@@ -5,7 +5,7 @@ namespace MarleneCollectionXmlTool.Domain.Tests.Services;
 
 public class CustomAttributeValueMappingServiceTests
 {
-    private ICustomAttributeValueMappingService _sut;
+    private readonly ICustomAttributeValueMappingService _sut;
 
     public CustomAttributeValueMappingServiceTests()
     {

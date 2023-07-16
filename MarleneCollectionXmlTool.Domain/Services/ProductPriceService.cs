@@ -14,7 +14,7 @@ public class ProductPriceService
     public ProductPriceService(WoocommerceDbContext dbContext)
     {
         _dbContext = dbContext;
-        _priceMarginFactor = 1.2m;
+        _priceMarginFactor = 1.0m;
     }
 
     public async Task UpdateProductPrices(
@@ -70,23 +70,20 @@ public class ProductPriceService
         _dbContext.SaveChanges();
     }
 
-    private (decimal newRegularPrice, decimal? newPromoPrice) GetNewProductPrice(
+    public (decimal newRegularPrice, decimal? newPromoPrice) GetNewProductPrice(
         decimal catalogPrice, decimal? promoPrice, decimal currentPrice, decimal? currentPromoPrice)
     {
         if (catalogPrice == 0 && promoPrice == 0) 
             return (currentPrice, currentPromoPrice);
 
-        if (currentPrice != catalogPrice)
+        if (currentPrice < catalogPrice)
             currentPrice = catalogPrice;
 
-        if (currentPromoPrice != null 
-            && promoPrice != null 
-            && currentPromoPrice > promoPrice * _priceMarginFactor)
-            currentPromoPrice = promoPrice;
-
-        currentPromoPrice ??= promoPrice;
+        currentPromoPrice = promoPrice;
 
         var currentPromoPriceWithMargin = currentPromoPrice * _priceMarginFactor;
-        return (currentPrice, currentPromoPriceWithMargin);
+        var currentPriceWithMargin = currentPrice * _priceMarginFactor;
+
+        return (currentPriceWithMargin, currentPromoPriceWithMargin);
     }
 }
