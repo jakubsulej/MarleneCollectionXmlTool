@@ -1,4 +1,5 @@
-﻿using MarleneCollectionXmlTool.DBAccessLayer;
+﻿using Google.Protobuf.WellKnownTypes;
+using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Helpers;
 using MarleneCollectionXmlTool.Domain.Utils;
@@ -9,7 +10,7 @@ namespace MarleneCollectionXmlTool.Domain.Services;
 
 public interface IProductPriceService
 {
-    Task UpdateProductPrices(List<WpPost> parentProducts, List<WpPost> allVariantProducts, List<WpPostmetum> productMetaDetails, XmlNodeList xmlProducts);
+    Task<int> UpdateProductPrices(List<WpPost> parentProducts, List<WpPost> allVariantProducts, List<WpPostmetum> productMetaDetails, XmlNodeList xmlProducts);
 }
 
 public class ProductPriceService : IProductPriceService
@@ -23,7 +24,7 @@ public class ProductPriceService : IProductPriceService
         _priceValueProvider = priceValueProvider;
     }
 
-    public async Task UpdateProductPrices(
+    public async Task<int> UpdateProductPrices(
         List<WpPost> parentProducts, List<WpPost> allVariantProducts,
         List<WpPostmetum> productMetaDetails, XmlNodeList xmlProducts)
     {
@@ -34,6 +35,7 @@ public class ProductPriceService : IProductPriceService
             .Where(x => productIds.Contains(x.ProductId))
             .ToListAsync();
 
+        var index = 0;
         foreach (XmlNode xmlProduct in xmlProducts)
         {
             var sku = string.Empty;
@@ -50,29 +52,55 @@ public class ProductPriceService : IProductPriceService
             var metaLookup = metaLookups.FirstOrDefault(x => x.Sku == sku);
             var productId = metaLookup.ProductId;
 
-            var regularPriceProductMeta = productMetaDetails?
+            var parentPriceMeta = productMetaDetails?
                 .Where(x => x.PostId == (ulong)productId)?
-                .Where(x => x.MetaKey == MetaKeyConstrains.RegularPrice)?
+                .Where(x => x.MetaKey == MetaKeyConstrains.Price)?
                 .FirstOrDefault();
 
-            var promoPriceProductMeta = productMetaDetails?
-                .Where(x => x.PostId == (ulong)productId)?
-                .Where(x => x.MetaKey == MetaKeyConstrains.SalePrice)?
-                .FirstOrDefault();
+            _ = decimal.TryParse(parentPriceMeta.MetaValue, out var currentParentPrice);
+
+            parentPriceMeta.MetaValue = catalogPrice.ToString();
+            metaLookup.MaxPrice = catalogPrice;
+            metaLookup.MinPrice = promoPrice ?? catalogPrice;
 
             var variantProducts = allVariantProducts.Where(x => x.PostParent == (ulong)productId).ToList();
 
-            _ = decimal.TryParse(regularPriceProductMeta.MetaValue, out var currentPrice);
-            _ = decimal.TryParse(promoPriceProductMeta.MetaValue, out var currentPromoPrice);
+            foreach (var variantProduct in variantProducts)
+            {
+                var priceMeta = productMetaDetails
+                    .Where(x => x.PostId == variantProduct.Id)
+                    .Where(x => x.MetaKey == MetaKeyConstrains.Price)
+                    .FirstOrDefault();
 
-            var (newRegularPrice, newPromoPrice) = _priceValueProvider.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
+                var regularPriceMeta = productMetaDetails
+                    .Where(x => x.PostId == variantProduct.Id)
+                    .Where(x => x.MetaKey == MetaKeyConstrains.RegularPrice)
+                    .FirstOrDefault();
 
-            regularPriceProductMeta.MetaValue = newRegularPrice.ToString();
-            promoPriceProductMeta.MetaValue = newPromoPrice.ToString();
-            metaLookup.MaxPrice = newRegularPrice;
-            metaLookup.MinPrice = newPromoPrice;
+                var salesPriceMeta = productMetaDetails?
+                    .Where(x => x.PostId == variantProduct.Id)?
+                    .Where(x => x.MetaKey == MetaKeyConstrains.SalePrice)?
+                    .FirstOrDefault();
+
+                _ = decimal.TryParse(regularPriceMeta.MetaValue, out var currentPrice);
+                decimal? currentPromoPrice = decimal.TryParse(salesPriceMeta.MetaValue, out var tempVal1) ? tempVal1 : null;
+
+                var (newRegularPrice, newPromoPrice) = 
+                    _priceValueProvider.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
+
+                priceMeta.MetaValue = newPromoPrice != null ? newPromoPrice.ToString() : newRegularPrice.ToString();
+                regularPriceMeta.MetaValue = newRegularPrice.ToString();
+                salesPriceMeta.MetaValue = newPromoPrice.ToString();
+                metaLookup.MaxPrice = newRegularPrice;
+                metaLookup.MinPrice = promoPrice ?? newRegularPrice;
+
+                if (newPromoPrice != null) salesPriceMeta.MetaValue = newPromoPrice.ToString();
+                else productMetaDetails.Remove(salesPriceMeta);
+            }
+
+            index++;
         }
 
-        //_dbContext.SaveChanges();
+        return index;
     }
 }

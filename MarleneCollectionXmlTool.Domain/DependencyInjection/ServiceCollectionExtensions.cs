@@ -58,6 +58,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IImageService, ImageService>();
         services.AddScoped<IWoocommerceRestApiService, WoocommerceRestApiService>();
         services.AddSingleton<IConfigurationArrayProvider, ConfigurationArrayProvider>();
+        services.AddScoped<IProductPriceService, ProductPriceService>();
+        services.AddSingleton<IProductPromoPriceValueProvider, ProductPromoPriceValueProvider>();
 
         //Cache services
         services.AddScoped<ICacheProvider, CacheProvider>();
