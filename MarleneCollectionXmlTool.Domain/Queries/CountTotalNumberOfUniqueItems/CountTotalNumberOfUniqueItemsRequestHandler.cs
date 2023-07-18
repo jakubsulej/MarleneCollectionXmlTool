@@ -1,42 +1,42 @@
 ﻿using FluentResults;
-using MarleneCollectionXmlTool.Domain.Helpers;
+using MarleneCollectionXmlTool.Domain.Services;
+using MarleneCollectionXmlTool.Domain.Utils;
 using MediatR;
-using Microsoft.Extensions.Configuration;
+using System.Xml;
 
 namespace MarleneCollectionXmlTool.Domain.Queries.CountTotalNumberOfUniqueItems;
 
 public class CountTotalNumberOfUniqueItemsRequestHandler : IRequestHandler<CountTotalNumberOfUniqueItemsRequest, Result<CountTotalNumberOfUniqueItemsResponse>>
 {
-    private readonly IConfiguration _configuration;
-    private readonly HttpClient _httpClient;
+    private readonly IGetXmlDocumentFromWholesalerService _wholesalerService;
 
-    public CountTotalNumberOfUniqueItemsRequestHandler(IConfiguration configuration)
+    public CountTotalNumberOfUniqueItemsRequestHandler(IGetXmlDocumentFromWholesalerService wholesalerService)
     {
-        _configuration = configuration;
-        _httpClient = new HttpClient
-        {
-            BaseAddress = new Uri(_configuration.GetValue<string>("BaseUrl"))
-        };
+        _wholesalerService = wholesalerService;
     }
 
     public async Task<Result<CountTotalNumberOfUniqueItemsResponse>> Handle(CountTotalNumberOfUniqueItemsRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var xmlUrl = _configuration.GetValue<string>("WoocommerceXmlUrl");
-            var response = await _httpClient.GetAsync(xmlUrl, cancellationToken);
+            var xmlDoc = await _wholesalerService.GetXmlDocumentNestedVariantsXmlUrl(cancellationToken);
+            var xmlProducts = xmlDoc.GetElementsByTagName(HurtIvonXmlConstrains.Produkt);
 
-            response.EnsureSuccessStatusCode();
+            var uniqueSkus = new List<string>();
 
-            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            foreach (XmlNode xmlProduct in xmlProducts)
+            {
+                foreach (XmlNode child in xmlProduct.ChildNodes)
+                {
+                    if (child.Name == HurtIvonXmlConstrains.KodKatalogowy)
+                    {
+                        uniqueSkus.Add(child.Value.Trim());
+                        break;
+                    }
+                }
+            }
 
-            var categoriesRaw = AttributeValuesXmlFileHelper.GetAttriubuteValuesFromXmlFile(responseContent, "category");
-            var categories = categoriesRaw.AttributeValues.GroupBy(x => x).SelectMany(x => x).ToList();
-
-            var colorAttributes = AttributeValuesXmlFileHelper.GetAttriubuteValuesFromXmlFile(responseContent, "id");
-            var numberOfItems = colorAttributes.AttributeValues.GroupBy(x => x).Count();
-
-            var result = new CountTotalNumberOfUniqueItemsResponse(numberOfItems);
+            var result = new CountTotalNumberOfUniqueItemsResponse(uniqueSkus.Count);
             return Result.Ok(result);
         }
         catch

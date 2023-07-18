@@ -70,8 +70,8 @@ public class UpdateMetaLookupsRequestHandler : IRequestHandler<UpdateMetaLookups
                 metaLookups.Add(lookup);
             }
 
-            await _dbContext.WpWcProductMetaLookups.AddRangeAsync(metaLookups);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.WpWcProductMetaLookups.AddRangeAsync(metaLookups, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return Result.Ok();
         }

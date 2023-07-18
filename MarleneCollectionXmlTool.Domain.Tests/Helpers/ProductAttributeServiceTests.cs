@@ -1,19 +1,18 @@
-﻿using Azure;
-using MarleneCollectionXmlTool.DBAccessLayer;
+﻿using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Services;
 using MarleneCollectionXmlTool.Domain.Tests.Utils;
 using Xunit;
 
-namespace MarleneCollectionXmlTool.Domain.Tests.Helpers.WpPostHelpers;
+namespace MarleneCollectionXmlTool.Domain.Tests.Helpers;
 
-public class ProductAttributeHelperTests
+public class ProductAttributeServiceTests
 {
     private readonly WoocommerceDbContext _dbContext;
     private readonly ProductAttributeService _sut;
 
-    public ProductAttributeHelperTests()
+    public ProductAttributeServiceTests()
     {
         _dbContext = FakeDbContextFactory.CreateMockDbContext<WoocommerceDbContext>();
         _sut = new ProductAttributeService(_dbContext);

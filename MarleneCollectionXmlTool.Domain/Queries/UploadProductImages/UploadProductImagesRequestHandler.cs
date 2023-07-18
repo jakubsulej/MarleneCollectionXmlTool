@@ -1,23 +1,21 @@
 ﻿using FluentResults;
 using MarleneCollectionXmlTool.DBAccessLayer;
-using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using System.Xml;
 
-namespace MarleneCollectionXmlTool.Domain.Queries.UploadProductImages;
+namespace MarleneCollectionXmlTool.Domain.Queries.DownloadProductImages;
 
-public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductImagesRequest, Result<UploadProductImagesResponse>>
+public class DownloadProductImagesRequestHandler : IRequestHandler<DownloadProductImagesRequest, Result<DownloadProductImagesResponse>>
 {
     private readonly IGetXmlDocumentFromWholesalerService _wholesalerService;
     private readonly IWoocommerceRestApiService _woocommerceRestApiService;
     private readonly IImageService _imageService;
     private readonly WoocommerceDbContext _dbContext;
 
-    public UploadProductImagesRequestHandler(
+    public DownloadProductImagesRequestHandler(
         IGetXmlDocumentFromWholesalerService wholesalerService,
         IWoocommerceRestApiService woocommerceRestApiService,
         IImageService imageService,
@@ -29,7 +27,7 @@ public class UploadProductImagesRequestHandler : IRequestHandler<UploadProductIm
         _dbContext = dbContext;
     }
 
-    public async Task<Result<UploadProductImagesResponse>> Handle(UploadProductImagesRequest request, CancellationToken cancellationToken)
+    public async Task<Result<DownloadProductImagesResponse>> Handle(DownloadProductImagesRequest request, CancellationToken cancellationToken)
     {
         try
         {

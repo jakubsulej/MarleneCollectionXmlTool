@@ -1,5 +1,5 @@
-﻿namespace MarleneCollectionXmlTool.Domain.Queries.UploadProductImages;
+﻿namespace MarleneCollectionXmlTool.Domain.Queries.DownloadProductImages;
 
-public class UploadProductImagesResponse
+public class DownloadProductImagesResponse
 {
 }

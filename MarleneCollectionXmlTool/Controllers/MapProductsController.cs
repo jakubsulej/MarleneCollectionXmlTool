@@ -6,7 +6,7 @@ using System.Threading;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales;
 using System.Linq;
 using MarleneCollectionXmlTool.Domain.Queries.UpdateMissingMetaLookups;
-using MarleneCollectionXmlTool.Domain.Queries.UploadProductImages;
+using MarleneCollectionXmlTool.Domain.Queries.DownloadProductImages;
 
 namespace MarleneCollectionXmlTool.Controllers;
 
@@ -41,10 +41,10 @@ public class MapProductsController : ControllerBase
         return Ok(response.Value);
     }
 
-    [HttpPost("UploadProductImages")]
-    public async Task<IActionResult> UploadProductImages(CancellationToken cancellationToken)
+    [HttpPost("DownloadProductImages")]
+    public async Task<IActionResult> DownloadProductImages(CancellationToken cancellationToken)
     {
-        var response = await _mediator.Send(new UploadProductImagesRequest(), cancellationToken); ;
+        var response = await _mediator.Send(new DownloadProductImagesRequest(), cancellationToken); ;
 
         if (response.IsFailed)
             return BadRequest(response.Errors.First().Message);

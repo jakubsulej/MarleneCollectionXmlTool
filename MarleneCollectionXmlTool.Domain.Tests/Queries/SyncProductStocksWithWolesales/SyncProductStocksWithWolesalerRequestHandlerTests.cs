@@ -32,8 +32,9 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         _configuration = A.Fake<IConfiguration>();
         _cacheProvider = A.Fake<ICacheProvider>();
         _propdctMetaService = A.Fake<IProductMetaService>();
+        var productPriceService = A.Fake<IProductPriceService>();
         var configurationArrayProvider = new ConfigurationArrayProvider(_configuration);
-        _sut = new SyncProductStocksWithWholesalerRequestHandler(_wholesalerService, _productAttributeHelper, configurationArrayProvider, _propdctMetaService, _cacheProvider, _configuration, _dbContext);
+        _sut = new SyncProductStocksWithWholesalerRequestHandler(_wholesalerService, _productAttributeHelper, configurationArrayProvider, _propdctMetaService, productPriceService, _cacheProvider, _configuration, _dbContext);
     }
 
     /// <summary>D20-ZIELON.xml</summary>

@@ -19,6 +19,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
     private readonly IGetXmlDocumentFromWholesalerService _wholesalerService;
     private readonly IProductAttributeService _productAttributeService; 
     private readonly IProductMetaService _metaService;
+    private readonly IProductPriceService _productPriceService;
     private readonly ICacheProvider _cacheProvider;
     private readonly WoocommerceDbContext _dbContext;
     private readonly List<string> _categoriesToSkip;
@@ -30,6 +31,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         IProductAttributeService productAttributeService, 
         IConfigurationArrayProvider configurationArrayProvider,
         IProductMetaService metaService,
+        IProductPriceService productPriceService,
         ICacheProvider cacheProvider,
         IConfiguration configuration,
         WoocommerceDbContext dbContext)
@@ -37,6 +39,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         _wholesalerService = wholesalerService;
         _productAttributeService = productAttributeService;
         _metaService = metaService;
+        _productPriceService = productPriceService;
         _cacheProvider = cacheProvider;
         _categoriesToSkip = configurationArrayProvider.GetCategoriesToSkip();
         _notUpdatableSkus = configurationArrayProvider.GetNotUpdatableSkus();
@@ -75,6 +78,8 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
             var syncedPostIdsWithWholesaler = await SyncXmlProductsWithWoocommerceDb(
                 parentProducts, productMetaDetails, xmlProducts, cancellationToken);
+
+            await _productPriceService.UpdateProductPrices(parentProducts, variantProducts, productMetaDetails, xmlProducts);
 
             var updatedProductsOutOfStock = await UpdateProductsAndVariantsOutOfStock(
                 parentProducts, variantProducts, productMetaDetails, syncedPostIdsWithWholesaler);

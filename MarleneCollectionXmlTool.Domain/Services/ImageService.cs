@@ -112,9 +112,9 @@ public class ImageService : IImageService
                 await File.WriteAllBytesAsync(productDirectory, file.Bytes);
             }
         }
-        catch (Exception e)
+        catch
         {
-
+            throw;
         }
     }
 
@@ -188,7 +188,7 @@ public class ImageService : IImageService
 
             return productIdUrlDict;
         }
-        catch (Exception e)
+        catch
         {
             return productIdUrlDict;
         }
