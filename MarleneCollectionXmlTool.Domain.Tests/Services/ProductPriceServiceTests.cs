@@ -1,4 +1,6 @@
-﻿using MarleneCollectionXmlTool.DBAccessLayer;
+﻿using FakeItEasy;
+using MarleneCollectionXmlTool.DBAccessLayer;
+using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.Domain.Helpers.Providers;
 using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MarleneCollectionXmlTool.Domain.Tests.Utils;
@@ -16,7 +18,7 @@ public class ProductPriceServiceTests
     public ProductPriceServiceTests()
     {
         _dbContext = FakeDbContextFactory.CreateMockDbContext<WoocommerceDbContext>();
-        _sut = new UpdateProductPriceService(_dbContext, new ProductPromoPriceValueProvider());
+        _sut = new UpdateProductPriceService(_dbContext, new ProductPromoPriceValueProvider(), A.Fake<IProductCategoryService>());
     }
 
     [Theory]

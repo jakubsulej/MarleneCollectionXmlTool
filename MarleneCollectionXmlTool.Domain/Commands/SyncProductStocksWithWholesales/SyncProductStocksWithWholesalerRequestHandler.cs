@@ -62,6 +62,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             var variantProducts = await _dbContext
                 .WpPosts
                 .Where(x => ids.Contains(x.PostParent))
+                .Where(x => x.PostType == WpPostConstrains.ProductVariation)
                 .ToListAsync(cancellationToken);
 
             ids.AddRange(variantProducts.Select(x => x.Id).ToList());

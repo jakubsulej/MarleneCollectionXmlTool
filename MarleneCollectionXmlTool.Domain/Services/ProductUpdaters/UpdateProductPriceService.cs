@@ -17,11 +17,16 @@ public class UpdateProductPriceService : IUpdateProductPriceService
 {
     private readonly WoocommerceDbContext _dbContext;
     private readonly IProductPromoPriceValueProvider _priceValueProvider;
+    private readonly IProductCategoryService _productCategoryService;
 
-    public UpdateProductPriceService(WoocommerceDbContext dbContext, IProductPromoPriceValueProvider priceValueProvider)
+    public UpdateProductPriceService(
+        WoocommerceDbContext dbContext, 
+        IProductPromoPriceValueProvider priceValueProvider,
+        IProductCategoryService productCategoryService)
     {
         _dbContext = dbContext;
         _priceValueProvider = priceValueProvider;
+        _productCategoryService = productCategoryService;
     }
 
     public async Task<int> UpdateProductPrices(
@@ -52,14 +57,21 @@ public class UpdateProductPriceService : IUpdateProductPriceService
             var parentMetaLookup = metaLookups.FirstOrDefault(x => x.Sku == sku);
             var productId = parentMetaLookup.ProductId;
 
+            var parentPost = parentProducts.FirstOrDefault(x => x.Id == (ulong)productId);
+
+            //if (promoPrice != null)
+            //    await _productCategoryService.UpdateProductCategory(parentPost, WpTermSlugConstrains.Promocje);
+            //else if (promoPrice == null && parentMetaLookup.MinPrice < parentMetaLookup.MaxPrice)
+            //    await _productCategoryService.RemoveProductCategory(parentPost, WpTermSlugConstrains.Promocje);
+
             var parentPriceMeta = productMetaDetails?
                 .Where(x => x.PostId == (ulong)productId)?
                 .Where(x => x.MetaKey == MetaKeyConstrains.Price)?
                 .FirstOrDefault();
 
-            _ = decimal.TryParse(parentPriceMeta.MetaValue, out var currentParentPrice);
+            _ = decimal.TryParse(parentPriceMeta?.MetaValue, out var currentParentPrice);
 
-            parentPriceMeta.MetaValue = catalogPrice.ToString();
+            if (parentPriceMeta != null) parentPriceMeta.MetaValue = catalogPrice.ToString();
             parentMetaLookup.MaxPrice = catalogPrice;
             parentMetaLookup.MinPrice = promoPrice ?? catalogPrice;
 
@@ -85,19 +97,41 @@ public class UpdateProductPriceService : IUpdateProductPriceService
                 var variantMetaLookup = metaLookups.FirstOrDefault(x => x.ProductId == (long)variantProduct.Id);
 
                 _ = decimal.TryParse(regularPriceMeta.MetaValue, out var currentPrice);
-                decimal? currentPromoPrice = decimal.TryParse(salesPriceMeta.MetaValue, out var tempVal1) ? tempVal1 : null;
+                decimal? currentPromoPrice = decimal.TryParse(salesPriceMeta?.MetaValue, out var tempVal1) ? tempVal1 : null;
 
                 var (newRegularPrice, newPromoPrice) =
                     _priceValueProvider.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
 
                 priceMeta.MetaValue = newPromoPrice != null ? newPromoPrice.ToString() : newRegularPrice.ToString();
+
                 regularPriceMeta.MetaValue = newRegularPrice.ToString();
-                salesPriceMeta.MetaValue = newPromoPrice.ToString();
+
+                if (salesPriceMeta != null) 
+                    salesPriceMeta.MetaValue = newPromoPrice.ToString();
+
                 variantMetaLookup.MaxPrice = newRegularPrice;
                 variantMetaLookup.MinPrice = promoPrice ?? newRegularPrice;
 
-                if (newPromoPrice != null) salesPriceMeta.MetaValue = newPromoPrice.ToString();
-                else _dbContext.Remove(salesPriceMeta);
+                if (newPromoPrice != null && salesPriceMeta != null)
+                {
+                    salesPriceMeta.MetaValue = newPromoPrice.ToString();
+                    //await _productCategoryService.UpdateProductCategory(variantProduct, WpTermSlugConstrains.Promocje);
+                }
+                else if (newPromoPrice != null && salesPriceMeta == null) 
+                {
+                    await _dbContext.AddAsync(new WpPostmetum
+                    {
+                        PostId = variantProduct.Id,
+                        MetaKey = MetaKeyConstrains.SalePrice,
+                        MetaValue = newPromoPrice.ToString(),
+                    });
+                    //await _productCategoryService.UpdateProductCategory(variantProduct, WpTermSlugConstrains.Promocje);
+                }
+                else if (salesPriceMeta != null)
+                {
+                    _dbContext.Remove(salesPriceMeta);
+                    //await _productCategoryService.RemoveProductCategory(variantProduct, WpTermSlugConstrains.Promocje);
+                }
 
                 index++;
             }

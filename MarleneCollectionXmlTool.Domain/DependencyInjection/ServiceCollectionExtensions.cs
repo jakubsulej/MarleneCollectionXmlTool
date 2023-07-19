@@ -60,6 +60,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IConfigurationArrayProvider, ConfigurationArrayProvider>();
         services.AddScoped<IUpdateProductPriceService, UpdateProductPriceService>();
         services.AddSingleton<IProductPromoPriceValueProvider, ProductPromoPriceValueProvider>();
+        services.AddScoped<IProductCategoryService, ProductCategoryService>();
 
         //Cache services
         services.AddScoped<ICacheProvider, CacheProvider>();
