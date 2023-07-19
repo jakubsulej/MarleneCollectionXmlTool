@@ -1,4 +1,4 @@
-﻿namespace MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales;
+﻿namespace MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales;
 
 public class SyncProductStocksWithWholesalerResponse
 {

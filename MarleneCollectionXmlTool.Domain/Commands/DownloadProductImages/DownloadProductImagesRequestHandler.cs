@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using MarleneCollectionXmlTool.DBAccessLayer;
+using MarleneCollectionXmlTool.Domain.Commands.DownloadProductImages;
 using MarleneCollectionXmlTool.Domain.Services.ClientSevices;
 using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MediatR;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Xml;
 
-namespace MarleneCollectionXmlTool.Domain.Queries.DownloadProductImages;
+namespace MarleneCollectionXmlTool.Domain.Commands.DownloadProductImages;
 
 public class DownloadProductImagesRequestHandler : IRequestHandler<DownloadProductImagesRequest, Result<DownloadProductImagesResponse>>
 {
@@ -37,7 +38,7 @@ public class DownloadProductImagesRequestHandler : IRequestHandler<DownloadProdu
 
             var parentSkuImageDict = new Dictionary<string, (string postTitle, List<string> imageUrls)>();
 
-            foreach (XmlNode xmlProduct in xmlProducts )
+            foreach (XmlNode xmlProduct in xmlProducts)
             {
                 var imageurls = new List<string>();
                 var postTitle = string.Empty;
@@ -77,7 +78,7 @@ public class DownloadProductImagesRequestHandler : IRequestHandler<DownloadProdu
                 var imagesWithNameDto = new ImagesWithNamesDto((ulong)productId, details.imageUrls, postTitle, sku);
                 imagesWithNames.Add(imagesWithNameDto);
             }
-            
+
             await _imageService.DownloadImagesOnLocalMachine(imagesWithNames);
 
             return Result.Ok();

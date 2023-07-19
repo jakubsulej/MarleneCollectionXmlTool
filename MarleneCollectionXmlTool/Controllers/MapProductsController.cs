@@ -1,12 +1,11 @@
-﻿using MarleneCollectionXmlTool.Domain.Queries.GetAllProductConfigurations;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System.Threading;
-using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales;
+using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales;
 using System.Linq;
-using MarleneCollectionXmlTool.Domain.Queries.UpdateMissingMetaLookups;
-using MarleneCollectionXmlTool.Domain.Queries.DownloadProductImages;
+using MarleneCollectionXmlTool.Domain.Commands.UpdateMissingMetaLookups;
+using MarleneCollectionXmlTool.Domain.Commands.DownloadProductImages;
 
 namespace MarleneCollectionXmlTool.Controllers;
 

@@ -1,6 +1,6 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace MarleneCollectionXmlTool.Domain.Queries.UpdateMissingMetaLookups;
+namespace MarleneCollectionXmlTool.Domain.Commands.UpdateMissingMetaLookups;
 
 public class UpdateMetaLookupsRequest : IRequest<Result<UpdateMetaLookupsResponse>> { }

@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace MarleneCollectionXmlTool.Domain.Queries.DownloadProductImages;
+namespace MarleneCollectionXmlTool.Domain.Commands.DownloadProductImages;
 
 public class DownloadProductImagesRequest : IRequest<Result<DownloadProductImagesResponse>>
 {

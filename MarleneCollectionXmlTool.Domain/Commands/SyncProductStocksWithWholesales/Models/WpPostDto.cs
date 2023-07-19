@@ -1,4 +1,4 @@
-﻿namespace MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
+﻿namespace MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales.Models;
 
 public class WpPostDto
 {

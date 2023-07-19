@@ -1,7 +1,7 @@
 ﻿using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
+using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Helpers.Extensions;
-using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Utils;
 
 namespace MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;

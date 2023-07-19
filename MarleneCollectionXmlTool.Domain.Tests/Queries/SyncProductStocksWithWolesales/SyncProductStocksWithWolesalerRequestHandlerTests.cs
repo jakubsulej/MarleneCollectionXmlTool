@@ -2,10 +2,9 @@
 using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
-using MarleneCollectionXmlTool.Domain.Helpers;
+using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales;
+using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Helpers.Providers;
-using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales;
-using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Services.ClientSevices;
 using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MarleneCollectionXmlTool.Domain.Tests.Utils;

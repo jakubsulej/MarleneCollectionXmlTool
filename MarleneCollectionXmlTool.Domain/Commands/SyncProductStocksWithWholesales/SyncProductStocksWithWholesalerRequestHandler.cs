@@ -2,9 +2,9 @@
 using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
+using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Enums;
 using MarleneCollectionXmlTool.Domain.Helpers.Providers;
-using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Services.ClientSevices;
 using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MarleneCollectionXmlTool.Domain.Utils;
@@ -13,12 +13,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Xml;
 
-namespace MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales;
+namespace MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales;
 
 public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<SyncProductStocksWithWholesalerRequest, Result<SyncProductStocksWithWholesalerResponse>>
 {
     private readonly IGetXmlDocumentFromWholesalerService _wholesalerService;
-    private readonly IProductAttributeService _productAttributeService; 
+    private readonly IProductAttributeService _productAttributeService;
     private readonly IUpdateProductPriceService _productPriceService;
     private readonly ICacheProvider _cacheProvider;
     private readonly WoocommerceDbContext _dbContext;
@@ -28,7 +28,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
     public SyncProductStocksWithWholesalerRequestHandler(
         IGetXmlDocumentFromWholesalerService wholesalerService,
-        IProductAttributeService productAttributeService, 
+        IProductAttributeService productAttributeService,
         IConfigurationArrayProvider configurationArrayProvider,
         IUpdateProductPriceService productPriceService,
         ICacheProvider cacheProvider,
@@ -96,15 +96,15 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
     }
 
     private async Task<int> UpdateProductsAndVariantsOutOfStock(
-        List<WpPost> parentProducts, 
-        List<WpPost> variantProducts, 
-        List<WpPostmetum> productMetaDetails, 
+        List<WpPost> parentProducts,
+        List<WpPost> variantProducts,
+        List<WpPostmetum> productMetaDetails,
         Dictionary<ulong, List<ulong>> syncedProductIdsWithWholesaler)
     {
         var notUpdatableProductId = productMetaDetails
             .Where(x => x.MetaKey == MetaKeyConstrains.Sku)
             .Where(x => _notUpdatableSkus.Contains(x.MetaValue))
-            .Select(x => x.PostId) 
+            .Select(x => x.PostId)
             .ToList();
 
         var filteredProducts = parentProducts
@@ -150,9 +150,9 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                     .Where(x => x.PostId == variantProductMissingInCatalog.Id)
                     .ToList();
 
-                if (variantProductMeta.Any() == false 
+                if (variantProductMeta.Any() == false
                     || variantProductMeta.Any(x => x.MetaKey == MetaKeyConstrains.Stock) == false
-                    || variantProductMeta.Any(x => x.MetaKey == MetaKeyConstrains.StockStatus) == false) 
+                    || variantProductMeta.Any(x => x.MetaKey == MetaKeyConstrains.StockStatus) == false)
                     continue;
 
                 variantProductMeta.FirstOrDefault(x => x.MetaKey == MetaKeyConstrains.Stock).MetaValue = "0";
@@ -187,7 +187,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                 {
                     productCanBeAdded = false;
                     continue;
-                }      
+                }
 
                 if (child.Name == HurtIvonXmlConstrains.Nazwa) parentProductWpPostDto.PostTitle = child.InnerText.Trim();
                 if (child.Name == HurtIvonXmlConstrains.KodKatalogowy) parentProductWpPostDto.Sku = child.InnerText.Trim();
@@ -202,7 +202,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                 if (child.Name == HurtIvonXmlConstrains.Warianty) variants = child.ChildNodes;
             }
 
-            if (productCanBeAdded == false) 
+            if (productCanBeAdded == false)
                 continue;
 
             foreach (XmlNode variant in variants)
@@ -270,7 +270,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             if (IsNewParent(productMetaDetails, parentProductWpPostDto))
             {
                 parentPostId = await StoreNewParentProduct(parentProductWpPostDto, variantProductWpPostDtos, cancellationToken);
-                
+
                 var newVariantPostIds = await StoreNewVariantProducts(missingVariantsWpPostDtos, parentPostId, cancellationToken);
                 variantPostIds.AddRange(newVariantPostIds);
             }
@@ -287,7 +287,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
                     .ToList();
 
                 parentProductMeta.First(x => x.MetaKey == MetaKeyConstrains.StockStatus).MetaValue = parentProductWpPostDto.StockStatus;
-                
+
                 var newVariantPostIds = await StoreNewVariantProducts(missingVariantsWpPostDtos, parentPostId, cancellationToken);
                 variantPostIds.AddRange(newVariantPostIds);
             }
@@ -298,18 +298,18 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         return syncedPostIdsWithWholesaler;
     }
 
-    private static bool IsNewParent(List<WpPostmetum> productMetaDetails, WpPostDto parentProductWpPostDto) 
+    private static bool IsNewParent(List<WpPostmetum> productMetaDetails, WpPostDto parentProductWpPostDto)
         => !productMetaDetails.Any(x => x.MetaKey == MetaKeyConstrains.Sku && x.MetaValue == parentProductWpPostDto.Sku);
 
-    private static bool IsNewVariantInExistingParent(List<WpPostmetum> productMetaDetails, WpPostDto variantProductWpPostDto) 
+    private static bool IsNewVariantInExistingParent(List<WpPostmetum> productMetaDetails, WpPostDto variantProductWpPostDto)
         => !productMetaDetails.Any(x => x.MetaKey == MetaKeyConstrains.Sku && x.MetaValue == variantProductWpPostDto.Sku);
 
-    private static bool IsNewVariantInNewParent(List<WpPostmetum> productMetaDetails, WpPostDto parentProductWpPostDto, WpPostDto variantProductWpPostDto) 
+    private static bool IsNewVariantInNewParent(List<WpPostmetum> productMetaDetails, WpPostDto parentProductWpPostDto, WpPostDto variantProductWpPostDto)
         => !(productMetaDetails.Any(x => x.MetaKey == MetaKeyConstrains.Sku && x.MetaValue == variantProductWpPostDto.Sku)
             || productMetaDetails.Any(x => x.MetaKey == MetaKeyConstrains.Sku && x.MetaValue == parentProductWpPostDto.Sku));
 
     private async Task<ulong> StoreNewParentProduct(
-        WpPostDto parentWpPostDto, 
+        WpPostDto parentWpPostDto,
         List<WpPostDto> variantProducts,
         CancellationToken cancellationToken)
     {
@@ -387,7 +387,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
     {
         var variantPostIds = new List<ulong>();
         var menuOrder = 1;
-        
+
         foreach (var variantWpPostDto in variantWpPostDtos)
         {
             var wpPost = new WpPost
@@ -420,7 +420,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             var variantPostId = wpPost.Id;
-            wpPost.Guid = WpPostConstrains.GetWpVariantPostGuid(_baseClientUrl,variantPostId);
+            wpPost.Guid = WpPostConstrains.GetWpVariantPostGuid(_baseClientUrl, variantPostId);
             variantPostIds.Add(variantPostId);
 
             var terms = _cacheProvider.GetAllWpTerms();

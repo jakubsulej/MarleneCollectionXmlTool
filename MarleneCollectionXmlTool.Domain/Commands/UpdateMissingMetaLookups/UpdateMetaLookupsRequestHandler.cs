@@ -1,12 +1,11 @@
 ﻿using FluentResults;
 using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
-using MarleneCollectionXmlTool.Domain.Services;
 using MarleneCollectionXmlTool.Domain.Utils;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace MarleneCollectionXmlTool.Domain.Queries.UpdateMissingMetaLookups;
+namespace MarleneCollectionXmlTool.Domain.Commands.UpdateMissingMetaLookups;
 
 public class UpdateMetaLookupsRequestHandler : IRequestHandler<UpdateMetaLookupsRequest, Result<UpdateMetaLookupsResponse>>
 {

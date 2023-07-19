@@ -1,6 +1,6 @@
 ﻿using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
-using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
+using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MarleneCollectionXmlTool.Domain.Tests.Utils;
 using Xunit;

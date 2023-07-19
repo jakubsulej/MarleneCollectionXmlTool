@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales;
+using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales;
 using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
