@@ -6,7 +6,7 @@ namespace MarleneCollectionXmlTool.Domain.Tests.Utils;
 internal static class MockDataHelper
 {
     internal record WpPostWithMeta(WpPost WpPost, List<WpPostmetum> WpPostmetum, WpWcProductMetaLookup ProductMetaLookup);
-    internal record FakeProductVariableValues(string Sku, string AttributeRozmiar, string Stock, string Price, string RegularPrice, string SalesPrice, string StockStatus);
+    internal record FakeProductVariableValues(string Sku, string AttributeRozmiar, string Stock, string Price, string RegularPrice, string? SalesPrice, string StockStatus);
 
     private static readonly Dictionary<string, List<FakeProductVariableValues>> _defaultVariantTree = new()
     {
@@ -117,7 +117,7 @@ internal static class MockDataHelper
                         Sku = variantTree[product.Key][variantIndex].Sku,
                         Virtual = false,
                         Downloadable = false,
-                        MinPrice = decimal.Parse(variantTree[product.Key][variantIndex].SalesPrice),
+                        MinPrice = decimal.Parse(variantTree[product.Key][variantIndex].Price),
                         MaxPrice = decimal.Parse(variantTree[product.Key][variantIndex].Price),
                         Onsale = false,
                         StockQuantity = double.Parse(variantTree[product.Key][variantIndex].Stock),

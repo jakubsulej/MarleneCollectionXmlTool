@@ -96,6 +96,8 @@ public class ProductPriceService : IProductPriceService
 
                 if (newPromoPrice != null) salesPriceMeta.MetaValue = newPromoPrice.ToString();
                 else productMetaDetails.Remove(salesPriceMeta);
+
+                index++;
             }
 
             index++;
