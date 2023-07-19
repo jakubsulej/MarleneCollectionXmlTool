@@ -11,12 +11,10 @@ namespace MarleneCollectionXmlTool.Domain.Queries.UpdateMissingMetaLookups;
 public class UpdateMetaLookupsRequestHandler : IRequestHandler<UpdateMetaLookupsRequest, Result<UpdateMetaLookupsResponse>>
 {
     private readonly WoocommerceDbContext _dbContext;
-    private readonly IProductMetaService _productMetaService;
 
-    public UpdateMetaLookupsRequestHandler(WoocommerceDbContext dbContext, IProductMetaService productMetaService)
+    public UpdateMetaLookupsRequestHandler(WoocommerceDbContext dbContext)
     {
         _dbContext = dbContext;
-        _productMetaService = productMetaService;
     }
 
     public async Task<Result<UpdateMetaLookupsResponse>> Handle(UpdateMetaLookupsRequest request, CancellationToken cancellationToken)

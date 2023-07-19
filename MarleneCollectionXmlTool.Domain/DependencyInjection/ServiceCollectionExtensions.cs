@@ -1,7 +1,8 @@
 ﻿using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Cache;
-using MarleneCollectionXmlTool.Domain.Helpers;
-using MarleneCollectionXmlTool.Domain.Services;
+using MarleneCollectionXmlTool.Domain.Helpers.Providers;
+using MarleneCollectionXmlTool.Domain.Services.ClientSevices;
+using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -54,11 +55,10 @@ public static class ServiceCollectionExtensions
 
         //Business services
         services.AddScoped<IProductAttributeService, ProductAttributeService>();
-        services.AddScoped<IProductMetaService, ProductMetaService>();
         services.AddScoped<IImageService, ImageService>();
         services.AddScoped<IWoocommerceRestApiService, WoocommerceRestApiService>();
         services.AddSingleton<IConfigurationArrayProvider, ConfigurationArrayProvider>();
-        services.AddScoped<IProductPriceService, ProductPriceService>();
+        services.AddScoped<IUpdateProductPriceService, UpdateProductPriceService>();
         services.AddSingleton<IProductPromoPriceValueProvider, ProductPromoPriceValueProvider>();
 
         //Cache services

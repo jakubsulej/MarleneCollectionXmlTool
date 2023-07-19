@@ -3,9 +3,8 @@ using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
 
-namespace MarleneCollectionXmlTool.Domain.Services;
+namespace MarleneCollectionXmlTool.Domain.Services.ClientSevices;
 
 public interface IWoocommerceRestApiService
 {

@@ -5,6 +5,7 @@ namespace MarleneCollectionXmlTool.Domain.Helpers;
 
 public class AttributeValuesXmlFileHelper
 {
+    [Obsolete("Use xml nodes instead")]
     public static GetProductAttributesResponse.Attribute GetAttriubuteValuesFromXmlFile(string responseContent, string attributeName)
     {
         string startTag = $"<{attributeName}>";

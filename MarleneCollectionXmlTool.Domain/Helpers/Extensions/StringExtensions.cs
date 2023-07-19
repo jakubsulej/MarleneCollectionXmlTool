@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace MarleneCollectionXmlTool.Domain.Helpers;
+namespace MarleneCollectionXmlTool.Domain.Helpers.Extensions;
 
 public static class StringExtenions
 {

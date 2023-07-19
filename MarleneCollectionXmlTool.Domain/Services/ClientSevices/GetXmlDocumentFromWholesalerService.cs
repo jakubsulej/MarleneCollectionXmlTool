@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Xml;
 
-namespace MarleneCollectionXmlTool.Domain.Services;
+namespace MarleneCollectionXmlTool.Domain.Services.ClientSevices;
 
 public interface IGetXmlDocumentFromWholesalerService
 {

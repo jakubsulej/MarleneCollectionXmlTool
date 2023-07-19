@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace MarleneCollectionXmlTool.Domain.Services;
+namespace MarleneCollectionXmlTool.Customizations.Services;
 
 public interface ICustomAttributeValueMappingService
 {
@@ -15,7 +15,7 @@ public class CustomAttributeValueMappingService : ICustomAttributeValueMappingSe
     {
         var projectDirectory = Directory.GetParent(Environment.CurrentDirectory)
             .Parent.Parent.Parent.FullName;
-        
+
         var json = File.ReadAllText(
             Path.Combine(projectDirectory,
             "MarleneCollectionXmlTool.Customizations",
@@ -32,7 +32,7 @@ public class CustomAttributeValueMappingService : ICustomAttributeValueMappingSe
 
         _dictionary.TryGetValue(attributeKey, out var attribute);
 
-        if (attribute == null) 
+        if (attribute == null)
             return attributeValue;
 
         attribute.TryGetValue(attributeValue, out var value);

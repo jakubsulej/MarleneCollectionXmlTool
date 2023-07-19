@@ -1,24 +1,24 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
-using MarleneCollectionXmlTool.Domain.Helpers;
+using MarleneCollectionXmlTool.Domain.Helpers.Providers;
 using MarleneCollectionXmlTool.Domain.Utils;
 using Microsoft.EntityFrameworkCore;
 using System.Xml;
 
-namespace MarleneCollectionXmlTool.Domain.Services;
+namespace MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 
-public interface IProductPriceService
+public interface IUpdateProductPriceService
 {
     Task<int> UpdateProductPrices(List<WpPost> parentProducts, List<WpPost> allVariantProducts, List<WpPostmetum> productMetaDetails, XmlNodeList xmlProducts);
 }
 
-public class ProductPriceService : IProductPriceService
+public class UpdateProductPriceService : IUpdateProductPriceService
 {
     private readonly WoocommerceDbContext _dbContext;
     private readonly IProductPromoPriceValueProvider _priceValueProvider;
 
-    public ProductPriceService(WoocommerceDbContext dbContext, IProductPromoPriceValueProvider priceValueProvider)
+    public UpdateProductPriceService(WoocommerceDbContext dbContext, IProductPromoPriceValueProvider priceValueProvider)
     {
         _dbContext = dbContext;
         _priceValueProvider = priceValueProvider;
@@ -87,7 +87,7 @@ public class ProductPriceService : IProductPriceService
                 _ = decimal.TryParse(regularPriceMeta.MetaValue, out var currentPrice);
                 decimal? currentPromoPrice = decimal.TryParse(salesPriceMeta.MetaValue, out var tempVal1) ? tempVal1 : null;
 
-                var (newRegularPrice, newPromoPrice) = 
+                var (newRegularPrice, newPromoPrice) =
                     _priceValueProvider.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
 
                 priceMeta.MetaValue = newPromoPrice != null ? newPromoPrice.ToString() : newRegularPrice.ToString();

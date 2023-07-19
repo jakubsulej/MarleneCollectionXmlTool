@@ -3,9 +3,11 @@ using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Helpers;
+using MarleneCollectionXmlTool.Domain.Helpers.Providers;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
-using MarleneCollectionXmlTool.Domain.Services;
+using MarleneCollectionXmlTool.Domain.Services.ClientSevices;
+using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MarleneCollectionXmlTool.Domain.Tests.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +20,6 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
     private readonly WoocommerceDbContext _dbContext;
     private readonly IConfiguration _configuration;
     private readonly ICacheProvider _cacheProvider;
-    private readonly IProductMetaService _propdctMetaService;
     private readonly SyncProductStocksWithWholesalerRequestHandler _sut;
     private readonly IGetXmlDocumentFromWholesalerService _wholesalerService;
     private readonly IProductAttributeService _productAttributeHelper;
@@ -31,10 +32,9 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         _dbContext = FakeDbContextFactory.CreateMockDbContext<WoocommerceDbContext>();
         _configuration = A.Fake<IConfiguration>();
         _cacheProvider = A.Fake<ICacheProvider>();
-        _propdctMetaService = A.Fake<IProductMetaService>();
-        var productPriceService = A.Fake<IProductPriceService>();
+        var productPriceService = A.Fake<IUpdateProductPriceService>();
         var configurationArrayProvider = new ConfigurationArrayProvider(_configuration);
-        _sut = new SyncProductStocksWithWholesalerRequestHandler(_wholesalerService, _productAttributeHelper, configurationArrayProvider, _propdctMetaService, productPriceService, _cacheProvider, _configuration, _dbContext);
+        _sut = new SyncProductStocksWithWholesalerRequestHandler(_wholesalerService, _productAttributeHelper, configurationArrayProvider, productPriceService, _cacheProvider, _configuration, _dbContext);
     }
 
     /// <summary>D20-ZIELON.xml</summary>

@@ -1,7 +1,6 @@
 ﻿using MarleneCollectionXmlTool.DBAccessLayer;
-using MarleneCollectionXmlTool.DBAccessLayer.Models;
-using MarleneCollectionXmlTool.Domain.Helpers;
-using MarleneCollectionXmlTool.Domain.Services;
+using MarleneCollectionXmlTool.Domain.Helpers.Providers;
+using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MarleneCollectionXmlTool.Domain.Tests.Utils;
 using MarleneCollectionXmlTool.Domain.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +11,12 @@ namespace MarleneCollectionXmlTool.Domain.Tests.Services;
 public class ProductPriceServiceTests
 {
     private readonly WoocommerceDbContext _dbContext;
-    private readonly ProductPriceService _sut;
+    private readonly UpdateProductPriceService _sut;
 
     public ProductPriceServiceTests()
     {
         _dbContext = FakeDbContextFactory.CreateMockDbContext<WoocommerceDbContext>();
-        _sut = new ProductPriceService(_dbContext, new ProductPromoPriceValueProvider());
+        _sut = new UpdateProductPriceService(_dbContext, new ProductPromoPriceValueProvider());
     }
 
     [Theory]

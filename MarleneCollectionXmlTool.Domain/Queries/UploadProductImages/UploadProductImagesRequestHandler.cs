@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using MarleneCollectionXmlTool.DBAccessLayer;
-using MarleneCollectionXmlTool.Domain.Services;
+using MarleneCollectionXmlTool.Domain.Services.ClientSevices;
+using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;

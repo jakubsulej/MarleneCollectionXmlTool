@@ -1,4 +1,4 @@
-﻿using MarleneCollectionXmlTool.Domain.Helpers;
+﻿using MarleneCollectionXmlTool.Domain.Helpers.Providers;
 using Xunit;
 
 namespace MarleneCollectionXmlTool.Domain.Tests.Helpers;

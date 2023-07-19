@@ -1,10 +1,10 @@
 ﻿using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
-using MarleneCollectionXmlTool.Domain.Helpers;
+using MarleneCollectionXmlTool.Domain.Helpers.Extensions;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Utils;
 
-namespace MarleneCollectionXmlTool.Domain.Services;
+namespace MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 
 public interface IProductAttributeService
 {

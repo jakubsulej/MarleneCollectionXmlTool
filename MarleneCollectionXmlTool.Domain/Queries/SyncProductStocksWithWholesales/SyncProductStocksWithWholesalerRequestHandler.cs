@@ -3,9 +3,10 @@ using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Enums;
-using MarleneCollectionXmlTool.Domain.Helpers;
+using MarleneCollectionXmlTool.Domain.Helpers.Providers;
 using MarleneCollectionXmlTool.Domain.Queries.SyncProductStocksWithWholesales.Models;
-using MarleneCollectionXmlTool.Domain.Services;
+using MarleneCollectionXmlTool.Domain.Services.ClientSevices;
+using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MarleneCollectionXmlTool.Domain.Utils;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -18,8 +19,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 {
     private readonly IGetXmlDocumentFromWholesalerService _wholesalerService;
     private readonly IProductAttributeService _productAttributeService; 
-    private readonly IProductMetaService _metaService;
-    private readonly IProductPriceService _productPriceService;
+    private readonly IUpdateProductPriceService _productPriceService;
     private readonly ICacheProvider _cacheProvider;
     private readonly WoocommerceDbContext _dbContext;
     private readonly List<string> _categoriesToSkip;
@@ -30,15 +30,13 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         IGetXmlDocumentFromWholesalerService wholesalerService,
         IProductAttributeService productAttributeService, 
         IConfigurationArrayProvider configurationArrayProvider,
-        IProductMetaService metaService,
-        IProductPriceService productPriceService,
+        IUpdateProductPriceService productPriceService,
         ICacheProvider cacheProvider,
         IConfiguration configuration,
         WoocommerceDbContext dbContext)
     {
         _wholesalerService = wholesalerService;
         _productAttributeService = productAttributeService;
-        _metaService = metaService;
         _productPriceService = productPriceService;
         _cacheProvider = cacheProvider;
         _categoriesToSkip = configurationArrayProvider.GetCategoriesToSkip();
@@ -79,10 +77,12 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             var syncedPostIdsWithWholesaler = await SyncXmlProductsWithWoocommerceDb(
                 parentProducts, productMetaDetails, xmlProducts, cancellationToken);
 
-            await _productPriceService.UpdateProductPrices(parentProducts, variantProducts, productMetaDetails, xmlProducts);
+            var updatedPrices = await _productPriceService.UpdateProductPrices(parentProducts, variantProducts, productMetaDetails, xmlProducts);
 
             var updatedProductsOutOfStock = await UpdateProductsAndVariantsOutOfStock(
                 parentProducts, variantProducts, productMetaDetails, syncedPostIdsWithWholesaler);
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             var response = new SyncProductStocksWithWholesalerResponse(
                 syncedPostIdsWithWholesaler.Count, updatedProductsOutOfStock);
@@ -111,6 +111,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             .Where(x => !notUpdatableProductId.Contains(x.Id))
             .ToList();
 
+        var updated = 1;
         foreach (var item in filteredProducts)
         {
             syncedProductIdsWithWholesaler.TryGetValue(item.Id, out var syncedVariantWithCatalogIds);
@@ -156,11 +157,14 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
                 variantProductMeta.FirstOrDefault(x => x.MetaKey == MetaKeyConstrains.Stock).MetaValue = "0";
                 variantProductMeta.FirstOrDefault(x => x.MetaKey == MetaKeyConstrains.StockStatus).MetaValue = MetaValueConstrains.OutOfStock;
+
+                updated++;
             }
+
+            updated++;
         }
 
-        var updatedRecords = await _dbContext.SaveChangesAsync();
-        return updatedRecords;
+        return updated;
     }
 
     private async Task<Dictionary<ulong, List<ulong>>> SyncXmlProductsWithWoocommerceDb(List<WpPost> parentProducts, List<WpPostmetum> productMetaDetails, XmlNodeList xmlProducts, CancellationToken cancellationToken)
@@ -344,7 +348,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         var productAttributesString = _productAttributeService.CreateProductAttributesString(parentWpPostDto, variantProducts);
         var terms = _cacheProvider.GetAllWpTerms();
         var (attributesLookups, termRelationships) = await _productAttributeService.MapParentProductTaxonomyValues(parentPostId, parentWpPostDto, variantProducts, terms);
-        var parentMetaLookup = _metaService.GenerateParentProductMetaLookup(parentWpPostDto, parentPostId);
+        var parentMetaLookup = GenerateParentProductMetaLookup(parentWpPostDto, parentPostId);
 
         var postMetas = new List<WpPostmetum>
         {
@@ -423,7 +427,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
             var taxonomy = await _productAttributeService.MapVariableProductTaxonomyValues(variantPostId, parentPostId, variantWpPostDto, terms);
             var relationships = taxonomy.Relationships;
             var attributeLookups = taxonomy.AttributesLookups;
-            var variantMetaLookup = _metaService.GenerateVariantProductMetaLookup(variantWpPostDto, variantPostId);
+            var variantMetaLookup = GenerateVariantProductMetaLookup(variantWpPostDto, variantPostId);
 
             var postMetas = new List<WpPostmetum>
             {
@@ -458,5 +462,51 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         }
 
         return variantPostIds;
+    }
+
+    private static WpWcProductMetaLookup GenerateParentProductMetaLookup(WpPostDto parentPost, ulong productId)
+    {
+        var metaLookup = new WpWcProductMetaLookup
+        {
+            ProductId = (long)productId,
+            Sku = parentPost.Sku,
+            Virtual = false,
+            Downloadable = false,
+            MinPrice = decimal.Parse(parentPost.RegularPrice),
+            MaxPrice = decimal.Parse(parentPost.RegularPrice),
+            Onsale = false,
+            StockQuantity = null,
+            StockStatus = parentPost.StockStatus,
+            RatingCount = 0,
+            AverageRating = 0,
+            TotalSales = 0,
+            TaxStatus = MetaValueConstrains.Taxable,
+            TaxClass = string.Empty
+        };
+
+        return metaLookup;
+    }
+
+    private static WpWcProductMetaLookup GenerateVariantProductMetaLookup(WpPostDto variantPost, ulong productId)
+    {
+        var metaLookup = new WpWcProductMetaLookup
+        {
+            ProductId = (long)productId,
+            Sku = variantPost.Sku,
+            Virtual = false,
+            Downloadable = false,
+            MinPrice = decimal.Parse(variantPost.RegularPrice),
+            MaxPrice = decimal.Parse(variantPost.RegularPrice),
+            Onsale = false,
+            StockQuantity = variantPost.StockInt,
+            StockStatus = variantPost.StockStatus,
+            RatingCount = 0,
+            AverageRating = 0,
+            TotalSales = 0,
+            TaxStatus = MetaValueConstrains.Taxable,
+            TaxClass = MetaValueConstrains.Parent
+        };
+
+        return metaLookup;
     }
 }

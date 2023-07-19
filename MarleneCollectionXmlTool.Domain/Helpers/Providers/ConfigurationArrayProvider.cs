@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace MarleneCollectionXmlTool.Domain.Helpers;
+namespace MarleneCollectionXmlTool.Domain.Helpers.Providers;
 
 public interface IConfigurationArrayProvider
 {

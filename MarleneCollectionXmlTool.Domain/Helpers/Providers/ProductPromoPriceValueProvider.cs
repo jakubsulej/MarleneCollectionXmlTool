@@ -1,4 +1,4 @@
-﻿namespace MarleneCollectionXmlTool.Domain.Helpers;
+﻿namespace MarleneCollectionXmlTool.Domain.Helpers.Providers;
 
 public interface IProductPromoPriceValueProvider
 {
