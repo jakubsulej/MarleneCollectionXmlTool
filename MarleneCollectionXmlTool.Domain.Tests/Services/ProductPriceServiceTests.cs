@@ -27,7 +27,22 @@ public class ProductPriceServiceTests
         var xmlDocument = XmlTestHelper.GetXmlDocumentFromStaticFile("D20-ZIELON-Promo");
         var xmlProducts = xmlDocument.GetElementsByTagName(HurtIvonXmlConstrains.Produkt);
 
-        var originalWpPostsWithMetas = MockDataHelper.GetFakeProductWithVariations();
+        var variantTree = new Dictionary<string, List<MockDataHelper.FakeProductVariableValues>>
+        {
+            {
+                "D20-ZIELON",
+                new List<MockDataHelper.FakeProductVariableValues>
+                {
+                    new MockDataHelper.FakeProductVariableValues(Sku: "5908214227099", AttributeRozmiar: "xs-s", Stock: "3", Price: "123", RegularPrice: "123", SalesPrice: "123", StockStatus: "instock"),
+                    new MockDataHelper.FakeProductVariableValues(Sku: "5908214227082", AttributeRozmiar: "m-l", Stock: "5", Price: "123", RegularPrice: "123", SalesPrice: "123", StockStatus: "instock"),
+                    new MockDataHelper.FakeProductVariableValues(Sku: "5908214231799", AttributeRozmiar: "xl-xxl", Stock: "11", Price: "123", RegularPrice: "123", SalesPrice: "123", StockStatus: "instock"),
+                    new MockDataHelper.FakeProductVariableValues(Sku: "590821423180", AttributeRozmiar: "3xl-4xl", Stock: "0", Price: "123", RegularPrice: "123", SalesPrice: "123", StockStatus: "outofstock"),
+                    new MockDataHelper.FakeProductVariableValues(Sku: "5908214231812", AttributeRozmiar: "5xl-6xl", Stock: "0", Price: "123", RegularPrice: "123", SalesPrice: "123", StockStatus: "outofstock"),
+                }
+            },
+        };
+
+        var originalWpPostsWithMetas = MockDataHelper.GetFakeProductWithVariations(variantTree);
         var parentProducts = originalWpPostsWithMetas.Where(x => x.WpPost.PostType == WpPostConstrains.Product).Select(x => x.WpPost).ToList();
         var variantProducts = originalWpPostsWithMetas.Where(x => x.WpPost.PostType == WpPostConstrains.ProductVariation).Select(x => x.WpPost).ToList();
         var productMetaDetails = originalWpPostsWithMetas.SelectMany(x => x.WpPostmetum).ToList();
