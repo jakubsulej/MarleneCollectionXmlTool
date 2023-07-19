@@ -81,7 +81,7 @@ public class ProductPriceServiceTests
 
     [Theory]
     [InlineData("84.50", "199.00", "84.50")]
-    public async Task WholesalerProductInNoMoreOnSale_SyncProductPricesToMatchWholesaler(string currentPrice, string currentRegularPrice, string currentSalesPrice)
+    public async Task WholesalerProductInNoMoreOnSale_RemoveSalePriceFromProductAndBringRegularPrice(string currentPrice, string currentRegularPrice, string currentSalesPrice)
     {
         //Arrange
         var xmlDocument = XmlTestHelper.GetXmlDocumentFromStaticFile("D20-ZIELON");
@@ -104,8 +104,6 @@ public class ProductPriceServiceTests
         await _dbContext.SaveChangesAsync();
 
         //Assert
-        Assert.Equal(originalWpPostsWithMetas.Count, result);
-
         var priceValues = await _dbContext.WpPostmeta
             .Where(x => variantProducts.Select(x => x.Id).Contains(x.PostId))
             .Where(x => x.MetaKey == MetaKeyConstrains.Price)
@@ -116,14 +114,10 @@ public class ProductPriceServiceTests
             .Where(x => x.MetaKey == MetaKeyConstrains.RegularPrice)
             .ToDictionaryAsync(x => x.PostId, x => decimal.Parse(x.MetaValue));
 
-        var salePriceValues = await _dbContext.WpPostmeta
+        var doesExistPriceValues = await _dbContext.WpPostmeta
             .Where(x => variantProducts.Select(x => x.Id).Contains(x.PostId))
             .Where(x => x.MetaKey == MetaKeyConstrains.SalePrice)
-            .ToDictionaryAsync(x => x.PostId, x => string.IsNullOrEmpty(x.MetaValue) ? (decimal?)null : decimal.Parse(x.MetaValue!));
-
-        Assert.True(priceValues.All(x => x.Value == 199.00m));
-        Assert.False(salePriceValues.All(x => x.Value == null));
-        Assert.True(regularPriceValues.All(x => x.Value == 199.00m));
+            .AnyAsync();
 
         var minPriceLookup = await _dbContext.WpWcProductMetaLookups
             .Where(x => variantProducts.Select(x => (long)x.Id).Contains(x.ProductId))
@@ -133,6 +127,10 @@ public class ProductPriceServiceTests
             .Where(x => variantProducts.Select(x => (long)x.Id).Contains(x.ProductId))
             .ToDictionaryAsync(x => x.ProductId, x => x.MaxPrice);
 
+        Assert.Equal(originalWpPostsWithMetas.Count, result);
+        Assert.False(doesExistPriceValues);
+        Assert.True(priceValues.All(x => x.Value == 199.00m));      
+        Assert.True(regularPriceValues.All(x => x.Value == 199.00m));
         Assert.True(minPriceLookup.All(x => x.Value == 199.00m));
         Assert.True(maxPriceLookup.All(x => x.Value == 199.00m));
     }

@@ -49,8 +49,8 @@ public class ProductPriceService : IProductPriceService
                 else if (child.Name == HurtIvonXmlConstrains.CenaPromo) promoPrice = decimal.Parse(child.InnerText.Trim());
             }
 
-            var metaLookup = metaLookups.FirstOrDefault(x => x.Sku == sku);
-            var productId = metaLookup.ProductId;
+            var parentMetaLookup = metaLookups.FirstOrDefault(x => x.Sku == sku);
+            var productId = parentMetaLookup.ProductId;
 
             var parentPriceMeta = productMetaDetails?
                 .Where(x => x.PostId == (ulong)productId)?
@@ -60,8 +60,8 @@ public class ProductPriceService : IProductPriceService
             _ = decimal.TryParse(parentPriceMeta.MetaValue, out var currentParentPrice);
 
             parentPriceMeta.MetaValue = catalogPrice.ToString();
-            metaLookup.MaxPrice = catalogPrice;
-            metaLookup.MinPrice = promoPrice ?? catalogPrice;
+            parentMetaLookup.MaxPrice = catalogPrice;
+            parentMetaLookup.MinPrice = promoPrice ?? catalogPrice;
 
             var variantProducts = allVariantProducts.Where(x => x.PostParent == (ulong)productId).ToList();
 
@@ -82,6 +82,8 @@ public class ProductPriceService : IProductPriceService
                     .Where(x => x.MetaKey == MetaKeyConstrains.SalePrice)?
                     .FirstOrDefault();
 
+                var variantMetaLookup = metaLookups.FirstOrDefault(x => x.ProductId == (long)variantProduct.Id);
+
                 _ = decimal.TryParse(regularPriceMeta.MetaValue, out var currentPrice);
                 decimal? currentPromoPrice = decimal.TryParse(salesPriceMeta.MetaValue, out var tempVal1) ? tempVal1 : null;
 
@@ -91,11 +93,11 @@ public class ProductPriceService : IProductPriceService
                 priceMeta.MetaValue = newPromoPrice != null ? newPromoPrice.ToString() : newRegularPrice.ToString();
                 regularPriceMeta.MetaValue = newRegularPrice.ToString();
                 salesPriceMeta.MetaValue = newPromoPrice.ToString();
-                metaLookup.MaxPrice = newRegularPrice;
-                metaLookup.MinPrice = promoPrice ?? newRegularPrice;
+                variantMetaLookup.MaxPrice = newRegularPrice;
+                variantMetaLookup.MinPrice = promoPrice ?? newRegularPrice;
 
                 if (newPromoPrice != null) salesPriceMeta.MetaValue = newPromoPrice.ToString();
-                else productMetaDetails.Remove(salesPriceMeta);
+                else _dbContext.Remove(salesPriceMeta);
 
                 index++;
             }
