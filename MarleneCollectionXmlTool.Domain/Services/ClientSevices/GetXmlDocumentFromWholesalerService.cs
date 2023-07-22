@@ -10,7 +10,7 @@ public interface IGetXmlDocumentFromWholesalerService
     Task<XmlDocument> GetXmlDocumentNestedVariantsXmlUrl(CancellationToken cancellationToken);
 }
 
-public class GetXmlDocumentFromWholesalerService : IGetXmlDocumentFromWholesalerService
+internal class GetXmlDocumentFromWholesalerService : IGetXmlDocumentFromWholesalerService
 {
     private readonly string _woocommerceXmlUrl;
     private readonly string _nestedVariantsXmlUrl;

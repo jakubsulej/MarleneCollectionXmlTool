@@ -1,4 +1,6 @@
-﻿using MarleneCollectionXmlTool.DBAccessLayer;
+﻿using FakeItEasy;
+using MarleneCollectionXmlTool.DBAccessLayer;
+using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
@@ -15,7 +17,7 @@ public class ProductAttributeServiceTests
     public ProductAttributeServiceTests()
     {
         _dbContext = FakeDbContextFactory.CreateMockDbContext<WoocommerceDbContext>();
-        _sut = new ProductAttributeService(_dbContext);
+        _sut = new ProductAttributeService(A.Fake<ICacheProvider>(), _dbContext);
     }
 
     [Fact]
@@ -371,7 +373,7 @@ public class ProductAttributeServiceTests
         };
 
         //Act
-        var response = _sut.MapParentProductTaxonomyValues(1, parentProductDto, variantProducDtos, terms);
+        var response = _sut.MapParentProductTaxonomyValues(1, parentProductDto, variantProducDtos);
 
         //Assert
         Assert.NotNull(response);

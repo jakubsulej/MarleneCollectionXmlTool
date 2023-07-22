@@ -1,6 +1,5 @@
 ﻿using FakeItEasy;
 using MarleneCollectionXmlTool.DBAccessLayer;
-using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales;
 using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales.Models;
@@ -17,23 +16,20 @@ namespace MarleneCollectionXmlTool.Domain.Tests.Queries.SyncProductStocksWithWol
 public class SyncProductStocksWithWolesalerRequestHandlerTests
 {
     private readonly WoocommerceDbContext _dbContext;
-    private readonly IConfiguration _configuration;
-    private readonly ICacheProvider _cacheProvider;
     private readonly SyncProductStocksWithWholesalerRequestHandler _sut;
     private readonly IGetXmlDocumentFromWholesalerService _wholesalerService;
-    private readonly IProductAttributeService _productAttributeHelper;
 
     public SyncProductStocksWithWolesalerRequestHandlerTests()
     {
         _wholesalerService = A.Fake<IGetXmlDocumentFromWholesalerService>();
-        _productAttributeHelper = A.Fake<IProductAttributeService>();
-        A.CallTo(() => _productAttributeHelper.CreateProductAttributesString(A<WpPostDto>._, A<List<WpPostDto>>._)).Returns(string.Empty);
         _dbContext = FakeDbContextFactory.CreateMockDbContext<WoocommerceDbContext>();
-        _configuration = A.Fake<IConfiguration>();
-        _cacheProvider = A.Fake<ICacheProvider>();
+        var productAttributeHelper = A.Fake<IProductAttributeService>();
+        A.CallTo(() => productAttributeHelper.CreateProductAttributesString(A<WpPostDto>._, A<List<WpPostDto>>._)).Returns(string.Empty);      
+        var configuration = A.Fake<IConfiguration>();
         var productPriceService = A.Fake<IUpdateProductPriceService>();
-        var configurationArrayProvider = new ConfigurationArrayProvider(_configuration);
-        _sut = new SyncProductStocksWithWholesalerRequestHandler(_wholesalerService, _productAttributeHelper, configurationArrayProvider, productPriceService, _cacheProvider, _configuration, _dbContext);
+        var configurationArrayProvider = new ConfigurationArrayProvider(configuration);
+        var syncProductWithWholesalerService = new SyncWoocommerceProductsWithWholesalerService(configuration, productAttributeHelper, configurationArrayProvider, _dbContext);
+        _sut = new SyncProductStocksWithWholesalerRequestHandler(syncProductWithWholesalerService, _wholesalerService, configurationArrayProvider, productPriceService, _dbContext);
     }
 
     /// <summary>D20-ZIELON.xml</summary>

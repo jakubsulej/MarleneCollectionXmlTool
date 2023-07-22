@@ -9,6 +9,13 @@ public partial class WpPostmetum
         MetaValue = metaValue;
     }
 
+    public WpPostmetum(ulong postId, string metaKey, int metaValue)
+    {
+        PostId = postId;
+        MetaKey = metaKey;
+        MetaValue = metaValue.ToString();
+    }
+
     public WpPostmetum() { }
 
     public ulong MetaId { get; set; }

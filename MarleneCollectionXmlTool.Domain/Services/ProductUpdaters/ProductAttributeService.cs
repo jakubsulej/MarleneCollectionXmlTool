@@ -1,4 +1,5 @@
 ﻿using MarleneCollectionXmlTool.DBAccessLayer;
+using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales.Models;
 using MarleneCollectionXmlTool.Domain.Helpers.Extensions;
@@ -9,18 +10,20 @@ namespace MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 public interface IProductAttributeService
 {
     string CreateProductAttributesString(WpPostDto parentProductDto, List<WpPostDto> variantProductsDtos);
-    Task<ProductAttributesDto> MapParentProductTaxonomyValues(ulong parentProductId, WpPostDto parentProductDto, List<WpPostDto> variableProductDtos, List<WpTerm> terms);
-    Task<ProductAttributesDto> MapVariableProductTaxonomyValues(ulong variantProductId, ulong parentProductId, WpPostDto variableProductDto, List<WpTerm> terms);
+    Task<ProductAttributesDto> MapParentProductTaxonomyValues(ulong parentProductId, WpPostDto parentProductDto, List<WpPostDto> variableProductDtos);
+    Task<ProductAttributesDto> MapVariableProductTaxonomyValues(ulong variantProductId, ulong parentProductId, WpPostDto variableProductDto);
 }
 
 public record ProductAttributesDto(List<WpWcProductAttributesLookup> AttributesLookups, List<WpTermRelationship> Relationships);
 
 public class ProductAttributeService : IProductAttributeService
 {
+    private readonly List<WpTerm> _terms;
     private readonly WoocommerceDbContext _dbContext;
 
-    public ProductAttributeService(WoocommerceDbContext dbContext)
+    public ProductAttributeService(ICacheProvider cacheProvider, WoocommerceDbContext dbContext)
     {
+        _terms = cacheProvider.GetAllWpTerms();
         _dbContext = dbContext;
     }
 
@@ -163,7 +166,7 @@ public class ProductAttributeService : IProductAttributeService
     }
 
     public async Task<ProductAttributesDto> MapParentProductTaxonomyValues(
-        ulong parentProductId, WpPostDto parentProductDto, List<WpPostDto> variableProductDtos, List<WpTerm> terms)
+        ulong parentProductId, WpPostDto parentProductDto, List<WpPostDto> variableProductDtos)
     {
         var rozmiarAttributeValues = variableProductDtos.SelectMany(x => x.AttributeRozmiar?.Split(","))?.ToList();
         var fasonAttributeValues = parentProductDto.AttributeFason?.Split(",")?.ToList();
@@ -171,11 +174,11 @@ public class ProductAttributeService : IProductAttributeService
         var wzorAttributeValues = parentProductDto.AttributeWzor?.Split(",")?.ToList();
         var dlugoscAttributeValues = parentProductDto.AttributeDlugosc?.Split(",")?.ToList();
 
-        var rozmiarTermIds = await MapTaxonomyRelationship("pa_rozmiar", rozmiarAttributeValues, terms);
-        var fasonTermIds = await MapTaxonomyRelationship("pa_fason", fasonAttributeValues, terms);
-        var kolorTermIds = await MapTaxonomyRelationship("pa_kolor", kolorAttributeValues, terms);
-        var wzorTermIds = await MapTaxonomyRelationship("pa_wzor", wzorAttributeValues, terms);
-        var dlugoscTermIds = await MapTaxonomyRelationship("pa_dlugosc", dlugoscAttributeValues, terms);
+        var rozmiarTermIds = await MapTaxonomyRelationship("pa_rozmiar", rozmiarAttributeValues);
+        var fasonTermIds = await MapTaxonomyRelationship("pa_fason", fasonAttributeValues);
+        var kolorTermIds = await MapTaxonomyRelationship("pa_kolor", kolorAttributeValues);
+        var wzorTermIds = await MapTaxonomyRelationship("pa_wzor", wzorAttributeValues);
+        var dlugoscTermIds = await MapTaxonomyRelationship("pa_dlugosc", dlugoscAttributeValues);
 
         var productAttributesLookup = new List<WpWcProductAttributesLookup>();
         var termRelationships = new List<WpTermRelationship>();
@@ -220,7 +223,7 @@ public class ProductAttributeService : IProductAttributeService
     }
 
     public async Task<ProductAttributesDto> MapVariableProductTaxonomyValues(
-        ulong variantProductId, ulong parentProductId, WpPostDto variableProductDto, List<WpTerm> terms)
+        ulong variantProductId, ulong parentProductId, WpPostDto variableProductDto)
     {
         var rozmiarAttributeValues = variableProductDto.AttributeRozmiar?.Split(",").ToList();
         var fasonAttributeValues = variableProductDto.AttributeFason?.Split(",")?.ToList();
@@ -228,11 +231,11 @@ public class ProductAttributeService : IProductAttributeService
         var wzorAttributeValues = variableProductDto.AttributeWzor?.Split(",")?.ToList();
         var dlugoscAttributeValues = variableProductDto.AttributeDlugosc?.Split(",")?.ToList();
 
-        var rozmiarTermIds = await MapTaxonomyRelationship("pa_rozmiar", rozmiarAttributeValues, terms);
-        var fasonTermIds = await MapTaxonomyRelationship("pa_fason", fasonAttributeValues, terms);
-        var kolorTermIds = await MapTaxonomyRelationship("pa_kolor", kolorAttributeValues, terms);
-        var wzorTermIds = await MapTaxonomyRelationship("pa_wzor", wzorAttributeValues, terms);
-        var dlugoscTermIds = await MapTaxonomyRelationship("pa_dlugosc", dlugoscAttributeValues, terms);
+        var rozmiarTermIds = await MapTaxonomyRelationship("pa_rozmiar", rozmiarAttributeValues);
+        var fasonTermIds = await MapTaxonomyRelationship("pa_fason", fasonAttributeValues);
+        var kolorTermIds = await MapTaxonomyRelationship("pa_kolor", kolorAttributeValues);
+        var wzorTermIds = await MapTaxonomyRelationship("pa_wzor", wzorAttributeValues);
+        var dlugoscTermIds = await MapTaxonomyRelationship("pa_dlugosc", dlugoscAttributeValues);
 
         var productAttributesLookup = new List<WpWcProductAttributesLookup>();
         var termRelationships = new List<WpTermRelationship>();
@@ -264,7 +267,7 @@ public class ProductAttributeService : IProductAttributeService
         return new ProductAttributesDto(productAttributesLookup, termRelationships);
     }
 
-    private async Task<List<ulong>> MapTaxonomyRelationship(string taxonomyName, List<string> attributeValues, List<WpTerm> terms)
+    private async Task<List<ulong>> MapTaxonomyRelationship(string taxonomyName, List<string> attributeValues)
     {
         try
         {
@@ -288,7 +291,7 @@ public class ProductAttributeService : IProductAttributeService
                 if (attributeName == HurtIvonXmlConstans.CzarnoBialy) attributeName = "BIAŁO-CZARNY";
                 if (attributeName == HurtIvonXmlConstans.WPepitke) attributeName = "PEPITKA";
 
-                var taxonomyId = terms?
+                var taxonomyId = _terms?
                     .Where(x => x.Name.ToUpper() == attributeName)
                     .FirstOrDefault()?
                     .TermId;
@@ -296,7 +299,7 @@ public class ProductAttributeService : IProductAttributeService
                 if (taxonomyId.HasValue == false)
                 {
                     var wpTerm = await AddMissingWpTermAsync(attributeName, taxonomyName);
-                    terms.Add(wpTerm);
+                    _terms.Add(wpTerm);
                     taxonomyId = wpTerm.TermId;
                 }
 

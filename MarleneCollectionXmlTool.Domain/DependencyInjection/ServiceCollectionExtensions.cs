@@ -3,6 +3,7 @@ using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.Domain.Helpers.Providers;
 using MarleneCollectionXmlTool.Domain.Services.ClientSevices;
 using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
+using MarleneCollectionXmlTool.Domain.Utils;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -23,7 +24,7 @@ public static class ServiceCollectionExtensions
             options.UseMySQL(connectionString);
         });
 
-        var baseUrl = configuration.GetValue<string>("HurtIvonBaseUrl");
+        var baseUrl = configuration.GetValue<string>(ConfigurationKeyConstans.HurtIvonBaseUrl);
         services.AddScoped<IGetXmlDocumentFromWholesalerService>(sp => new GetXmlDocumentFromWholesalerService(new Uri(baseUrl), configuration));
 
         services.AddCommonServices();
@@ -40,7 +41,7 @@ public static class ServiceCollectionExtensions
             options.UseMySQL(connectionString);
         });
 
-        var baseUrl = Environment.GetEnvironmentVariable("HurtIvonBaseUrl");
+        var baseUrl = Environment.GetEnvironmentVariable(ConfigurationKeyConstans.HurtIvonBaseUrl);
         services.AddScoped<IGetXmlDocumentFromWholesalerService>(sp => new GetXmlDocumentFromWholesalerService(new Uri(baseUrl)));
         
         services.AddCommonServices();
@@ -61,6 +62,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUpdateProductPriceService, UpdateProductPriceService>();
         services.AddSingleton<IProductPromoPriceValueProvider, ProductPromoPriceValueProvider>();
         services.AddScoped<IProductCategoryService, ProductCategoryService>();
+        services.AddScoped<ISyncWoocommerceProductsWithWholesalerService, SyncWoocommerceProductsWithWholesalerService>();
 
         //Cache services
         services.AddScoped<ICacheProvider, CacheProvider>();
@@ -72,11 +74,11 @@ public static class ServiceCollectionExtensions
     {
         var mySqlBuilder = new MySqlConnectionStringBuilder
         {
-            Server = configuration.GetValue<string>("DB_HOST"),
-            Port = configuration.GetValue<uint>("DB_PORT"),
-            UserID = configuration.GetValue<string>("DB_USER"),
-            Password = configuration.GetValue<string>("DB_PASSWORD"),
-            Database = configuration.GetValue<string>("DB_NAME"),
+            Server = configuration.GetValue<string>(ConfigurationKeyConstans.DB_HOST),
+            Port = configuration.GetValue<uint>(ConfigurationKeyConstans.DB_PORT),
+            UserID = configuration.GetValue<string>(ConfigurationKeyConstans.DB_USER),
+            Password = configuration.GetValue<string>(ConfigurationKeyConstans.DB_PASSWORD),
+            Database = configuration.GetValue<string>(ConfigurationKeyConstans.DB_NAME),
             AllowZeroDateTime = true,
             ConvertZeroDateTime = true,
         };
@@ -88,11 +90,11 @@ public static class ServiceCollectionExtensions
     {
         var mySqlBuilder = new MySqlConnectionStringBuilder
         {
-            Server = Environment.GetEnvironmentVariable("DB_HOST"),
-            Port = uint.Parse(Environment.GetEnvironmentVariable("DB_PORT")),
-            UserID = Environment.GetEnvironmentVariable("DB_USER"),
-            Password = Environment.GetEnvironmentVariable("DB_PASSWORD"),
-            Database = Environment.GetEnvironmentVariable("DB_NAME"),
+            Server = Environment.GetEnvironmentVariable(ConfigurationKeyConstans.DB_HOST),
+            Port = uint.Parse(Environment.GetEnvironmentVariable(ConfigurationKeyConstans.DB_PORT)),
+            UserID = Environment.GetEnvironmentVariable(ConfigurationKeyConstans.DB_USER),
+            Password = Environment.GetEnvironmentVariable(ConfigurationKeyConstans.DB_PASSWORD),
+            Database = Environment.GetEnvironmentVariable(ConfigurationKeyConstans.DB_NAME),
             AllowZeroDateTime = true,
             ConvertZeroDateTime = true,
         };
