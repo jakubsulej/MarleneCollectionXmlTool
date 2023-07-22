@@ -1,6 +1,6 @@
 ﻿namespace MarleneCollectionXmlTool.Domain.Utils;
 
-public struct MetaKeyConstrains
+public struct MetaKeyConstans
 {
     public const string Stock = "_stock";
     public const string StockStatus = "_stock_status";

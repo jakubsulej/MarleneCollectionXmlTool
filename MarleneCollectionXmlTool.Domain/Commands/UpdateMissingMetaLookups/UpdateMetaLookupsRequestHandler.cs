@@ -41,17 +41,17 @@ public class UpdateMetaLookupsRequestHandler : IRequestHandler<UpdateMetaLookups
                     .Where(x => x.PostId == postId)
                     .ToList();
 
-                if (productMetas.Any(x => x.MetaKey == MetaKeyConstrains.Sku) == false) continue;
+                if (productMetas.Any(x => x.MetaKey == MetaKeyConstans.Sku) == false) continue;
 
-                var sku = productMetas.FirstOrDefault(x => x.MetaKey == MetaKeyConstrains.Sku).MetaValue;
-                var price = decimal.Parse(productMetas.FirstOrDefault(x => x.MetaKey == MetaKeyConstrains.Price).MetaValue);
-                var stockStatus = productMetas.FirstOrDefault(x => x.MetaKey == MetaKeyConstrains.StockStatus).MetaValue;
-                var parent = productMetas.FirstOrDefault(x => x.MetaKey == MetaKeyConstrains.HasParent)?.MetaValue?.ToUpper() == "NO";
+                var sku = productMetas.FirstOrDefault(x => x.MetaKey == MetaKeyConstans.Sku).MetaValue;
+                var price = decimal.Parse(productMetas.FirstOrDefault(x => x.MetaKey == MetaKeyConstans.Price).MetaValue);
+                var stockStatus = productMetas.FirstOrDefault(x => x.MetaKey == MetaKeyConstans.StockStatus).MetaValue;
+                var parent = productMetas.FirstOrDefault(x => x.MetaKey == MetaKeyConstans.HasParent)?.MetaValue?.ToUpper() == "NO";
 
                 var lookup = new WpWcProductMetaLookup
                 {
                     ProductId = (long)postId,
-                    Sku = productMetas.FirstOrDefault(x => x.MetaKey == MetaKeyConstrains.Sku).MetaValue,
+                    Sku = productMetas.FirstOrDefault(x => x.MetaKey == MetaKeyConstans.Sku).MetaValue,
                     Virtual = false,
                     Downloadable = false,
                     MinPrice = price,
@@ -61,8 +61,8 @@ public class UpdateMetaLookupsRequestHandler : IRequestHandler<UpdateMetaLookups
                     RatingCount = 0,
                     AverageRating = 0,
                     TotalSales = 0,
-                    TaxStatus = MetaValueConstrains.Taxable,
-                    TaxClass = parent ? string.Empty : MetaValueConstrains.Parent
+                    TaxStatus = MetaValueConstans.Taxable,
+                    TaxClass = parent ? string.Empty : MetaValueConstans.Parent
                 };
 
                 metaLookups.Add(lookup);

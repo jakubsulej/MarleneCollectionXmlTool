@@ -1,6 +1,6 @@
 ﻿namespace MarleneCollectionXmlTool.Domain.Utils;
 
-public struct WpTermSlugConstrains
+public struct WpTermSlugConstans
 {
     public const string Nowosci = "nowosci";
     public const string Sukienki = "sukienki";

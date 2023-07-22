@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using MarleneCollectionXmlTool.Domain.Utils;
+using Microsoft.Extensions.Configuration;
 using System.Xml;
 
 namespace MarleneCollectionXmlTool.Domain.Services.ClientSevices;
@@ -17,15 +18,15 @@ public class GetXmlDocumentFromWholesalerService : IGetXmlDocumentFromWholesaler
 
     public GetXmlDocumentFromWholesalerService(Uri baseAddress, IConfiguration configuration)
     {
-        _woocommerceXmlUrl = configuration.GetValue<string>("WoocommerceXmlUrl");
-        _nestedVariantsXmlUrl = configuration.GetValue<string>("NestedVariantsXmlUrl");
+        _woocommerceXmlUrl = configuration.GetValue<string>(ConfigurationKeyConstans.WoocommerceXmlUrl);
+        _nestedVariantsXmlUrl = configuration.GetValue<string>(ConfigurationKeyConstans.NestedVariantsXmlUrl);
         _httpClient = new HttpClient { BaseAddress = baseAddress };
     }
 
     public GetXmlDocumentFromWholesalerService(Uri baseAddress)
     {
-        _woocommerceXmlUrl = Environment.GetEnvironmentVariable("WoocommerceXmlUrl");
-        _nestedVariantsXmlUrl = Environment.GetEnvironmentVariable("NestedVariantsXmlUrl");
+        _woocommerceXmlUrl = Environment.GetEnvironmentVariable(ConfigurationKeyConstans.WoocommerceXmlUrl);
+        _nestedVariantsXmlUrl = Environment.GetEnvironmentVariable(ConfigurationKeyConstans.NestedVariantsXmlUrl);
         _httpClient = new HttpClient { BaseAddress = baseAddress };
     }
 

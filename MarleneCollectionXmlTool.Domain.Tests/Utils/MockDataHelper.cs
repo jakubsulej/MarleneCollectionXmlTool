@@ -44,7 +44,7 @@ internal static class MockDataHelper
                         PostContent = "dummy content",
                         PostTitle = "dummy post title",
                         PostExcerpt = "dummy post exceprt",
-                        PostStatus = WpPostConstrains.Publish,
+                        PostStatus = WpPostConstans.Publish,
                         PostName = "dummy post name",
                         PostParent = 0,
                         Guid = string.Empty,
@@ -52,13 +52,13 @@ internal static class MockDataHelper
                     },
                     new List<WpPostmetum>
                     {
-                        new WpPostmetum(parentId, MetaKeyConstrains.Sku, product.Key),
-                        new WpPostmetum(parentId, MetaKeyConstrains.ManageStock, MetaValueConstrains.No),
-                        new WpPostmetum(parentId, MetaKeyConstrains.Stock, null),
-                        new WpPostmetum(parentId, MetaKeyConstrains.StockStatus, MetaValueConstrains.InStock),
-                        new WpPostmetum(parentId, MetaKeyConstrains.ProductAttributes, "\"a:5:{s:7:\\\"rozmiar\\\";a:6:{s:4:\\\"name\\\";s:7:\\\"Rozmiar\\\";s:5:\\\"value\\\";s:39:\\\"XS/S | M/L | XL/XXL | 3XL/4XL | 5XL/6XL\\\";s:8:\\\"position\\\";i:1;s:10:\\\"is_visible\\\";i:1;s:12:\\\"is_variation\\\";i:1;s:11:\\\"is_taxonomy\\\";i:0;}s:5:\\\"kolor\\\";a:6:{s:4:\\\"name\\\";s:5:\\\"Kolor\\\";s:5:\\\"value\\\";s:7:\\\"Bordowy\\\";s:8:\\\"position\\\";i:1;s:10:\\\"is_visible\\\";i:1;s:12:\\\"is_variation\\\";i:0;s:11:\\\"is_taxonomy\\\";i:0;}s:5:\\\"fason\\\";a:6:{s:4:\\\"name\\\";s:5:\\\"Fason\\\";s:5:\\\"value\\\";s:26:\\\"Z kieszeniami | Z kapturem\\\";s:8:\\\"position\\\";i:1;s:10:\\\"is_visible\\\";i:1;s:12:\\\"is_variation\\\";i:0;s:11:\\\"is_taxonomy\\\";i:0;}s:7:\\\"dlugosc\\\";a:6:{s:4:\\\"name\\\";s:7:\\\"Długość\\\";s:5:\\\"value\\\";s:6:\\\"Długie\\\";s:8:\\\"position\\\";i:1;s:10:\\\"is_visible\\\";i:1;s:12:\\\"is_variation\\\";i:0;s:11:\\\"is_taxonomy\\\";i:0;}s:4:\\\"wzor\\\";a:6:{s:4:\\\"name\\\";s:4:\\\"Wzór\\\";s:5:\\\"value\\\";s:13:\\\"Jednokolorowe\\\";s:8:\\\"position\\\";i:1;s:10:\\\"is_visible\\\";i:1;s:12:\\\"is_variation\\\";i:0;s:11:\\\"is_taxonomy\\\";i:0;}}\", \r\n"),
-                        new WpPostmetum(parentId, MetaKeyConstrains.HasParent, MetaValueConstrains.No),
-                        new WpPostmetum(parentId, MetaKeyConstrains.Price, "123"),
+                        new WpPostmetum(parentId, MetaKeyConstans.Sku, product.Key),
+                        new WpPostmetum(parentId, MetaKeyConstans.ManageStock, MetaValueConstans.No),
+                        new WpPostmetum(parentId, MetaKeyConstans.Stock, null),
+                        new WpPostmetum(parentId, MetaKeyConstans.StockStatus, MetaValueConstans.InStock),
+                        new WpPostmetum(parentId, MetaKeyConstans.ProductAttributes, "\"a:5:{s:7:\\\"rozmiar\\\";a:6:{s:4:\\\"name\\\";s:7:\\\"Rozmiar\\\";s:5:\\\"value\\\";s:39:\\\"XS/S | M/L | XL/XXL | 3XL/4XL | 5XL/6XL\\\";s:8:\\\"position\\\";i:1;s:10:\\\"is_visible\\\";i:1;s:12:\\\"is_variation\\\";i:1;s:11:\\\"is_taxonomy\\\";i:0;}s:5:\\\"kolor\\\";a:6:{s:4:\\\"name\\\";s:5:\\\"Kolor\\\";s:5:\\\"value\\\";s:7:\\\"Bordowy\\\";s:8:\\\"position\\\";i:1;s:10:\\\"is_visible\\\";i:1;s:12:\\\"is_variation\\\";i:0;s:11:\\\"is_taxonomy\\\";i:0;}s:5:\\\"fason\\\";a:6:{s:4:\\\"name\\\";s:5:\\\"Fason\\\";s:5:\\\"value\\\";s:26:\\\"Z kieszeniami | Z kapturem\\\";s:8:\\\"position\\\";i:1;s:10:\\\"is_visible\\\";i:1;s:12:\\\"is_variation\\\";i:0;s:11:\\\"is_taxonomy\\\";i:0;}s:7:\\\"dlugosc\\\";a:6:{s:4:\\\"name\\\";s:7:\\\"Długość\\\";s:5:\\\"value\\\";s:6:\\\"Długie\\\";s:8:\\\"position\\\";i:1;s:10:\\\"is_visible\\\";i:1;s:12:\\\"is_variation\\\";i:0;s:11:\\\"is_taxonomy\\\";i:0;}s:4:\\\"wzor\\\";a:6:{s:4:\\\"name\\\";s:4:\\\"Wzór\\\";s:5:\\\"value\\\";s:13:\\\"Jednokolorowe\\\";s:8:\\\"position\\\";i:1;s:10:\\\"is_visible\\\";i:1;s:12:\\\"is_variation\\\";i:0;s:11:\\\"is_taxonomy\\\";i:0;}}\", \r\n"),
+                        new WpPostmetum(parentId, MetaKeyConstans.HasParent, MetaValueConstans.No),
+                        new WpPostmetum(parentId, MetaKeyConstans.Price, "123"),
                     },
                     new WpWcProductMetaLookup
                     {
@@ -70,11 +70,11 @@ internal static class MockDataHelper
                         MaxPrice = 123,
                         Onsale = false,
                         StockQuantity = 0,
-                        StockStatus = MetaValueConstrains.InStock,
+                        StockStatus = MetaValueConstans.InStock,
                         RatingCount = null,
                         AverageRating = null,
                         TotalSales = 0,
-                        TaxStatus = MetaValueConstrains.Taxable
+                        TaxStatus = MetaValueConstans.Taxable
                     }
                 )
             };
@@ -93,7 +93,7 @@ internal static class MockDataHelper
                         PostContent = "dummy content",
                         PostTitle = "dummy post title",
                         PostExcerpt = "dummy post exceprt",
-                        PostStatus = WpPostConstrains.Publish,
+                        PostStatus = WpPostConstans.Publish,
                         PostName = "dummy post name",
                         PostParent = parentId,
                         Guid = string.Empty,
@@ -101,15 +101,15 @@ internal static class MockDataHelper
                     },
                     new List<WpPostmetum>
                     {
-                        new WpPostmetum(variantId, MetaKeyConstrains.VariantDescription, string.Empty),
-                        new WpPostmetum(variantId, MetaKeyConstrains.ManageStock, MetaValueConstrains.Yes),
-                        new WpPostmetum(variantId, MetaKeyConstrains.Stock, variantTree[product.Key][variantIndex].Stock),
-                        new WpPostmetum(variantId, MetaKeyConstrains.StockStatus, variantTree[product.Key][variantIndex].StockStatus),
-                        new WpPostmetum(variantId, MetaKeyConstrains.AttributePaRozmiar, variantTree[product.Key][variantIndex].AttributeRozmiar),
-                        new WpPostmetum(variantId, MetaKeyConstrains.Sku, variantTree[product.Key][variantIndex].Sku),
-                        new WpPostmetum(variantId, MetaKeyConstrains.RegularPrice, variantTree[product.Key][variantIndex].Price),
-                        new WpPostmetum(variantId, MetaKeyConstrains.Price, variantTree[product.Key][variantIndex].Price),
-                        new WpPostmetum(variantId, MetaKeyConstrains.SalePrice, variantTree[product.Key][variantIndex].SalesPrice),
+                        new WpPostmetum(variantId, MetaKeyConstans.VariantDescription, string.Empty),
+                        new WpPostmetum(variantId, MetaKeyConstans.ManageStock, MetaValueConstans.Yes),
+                        new WpPostmetum(variantId, MetaKeyConstans.Stock, variantTree[product.Key][variantIndex].Stock),
+                        new WpPostmetum(variantId, MetaKeyConstans.StockStatus, variantTree[product.Key][variantIndex].StockStatus),
+                        new WpPostmetum(variantId, MetaKeyConstans.AttributePaRozmiar, variantTree[product.Key][variantIndex].AttributeRozmiar),
+                        new WpPostmetum(variantId, MetaKeyConstans.Sku, variantTree[product.Key][variantIndex].Sku),
+                        new WpPostmetum(variantId, MetaKeyConstans.RegularPrice, variantTree[product.Key][variantIndex].Price),
+                        new WpPostmetum(variantId, MetaKeyConstans.Price, variantTree[product.Key][variantIndex].Price),
+                        new WpPostmetum(variantId, MetaKeyConstans.SalePrice, variantTree[product.Key][variantIndex].SalesPrice),
                     },
                     new WpWcProductMetaLookup
                     {
@@ -125,7 +125,7 @@ internal static class MockDataHelper
                         RatingCount = null,
                         AverageRating = null,
                         TotalSales = 0,
-                        TaxStatus = MetaValueConstrains.Taxable
+                        TaxStatus = MetaValueConstans.Taxable
                     }
                 ));
 

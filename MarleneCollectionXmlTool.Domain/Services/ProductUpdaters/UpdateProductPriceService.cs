@@ -49,9 +49,9 @@ public class UpdateProductPriceService : IUpdateProductPriceService
 
             foreach (XmlNode child in xmlProduct.ChildNodes)
             {
-                if (child.Name == HurtIvonXmlConstrains.KodKatalogowy) sku = child.InnerText.Trim();
-                else if (child.Name == HurtIvonXmlConstrains.CenaKatalogowa) catalogPrice = decimal.Parse(child.InnerText.Trim());
-                else if (child.Name == HurtIvonXmlConstrains.CenaPromo) promoPrice = decimal.Parse(child.InnerText.Trim());
+                if (child.Name == HurtIvonXmlConstans.KodKatalogowy) sku = child.InnerText.Trim();
+                else if (child.Name == HurtIvonXmlConstans.CenaKatalogowa) catalogPrice = decimal.Parse(child.InnerText.Trim());
+                else if (child.Name == HurtIvonXmlConstans.CenaPromo) promoPrice = decimal.Parse(child.InnerText.Trim());
             }
 
             var parentMetaLookup = metaLookups.FirstOrDefault(x => x.Sku == sku);
@@ -66,7 +66,7 @@ public class UpdateProductPriceService : IUpdateProductPriceService
 
             var parentPriceMeta = productMetaDetails?
                 .Where(x => x.PostId == (ulong)productId)?
-                .Where(x => x.MetaKey == MetaKeyConstrains.Price)?
+                .Where(x => x.MetaKey == MetaKeyConstans.Price)?
                 .FirstOrDefault();
 
             _ = decimal.TryParse(parentPriceMeta?.MetaValue, out var currentParentPrice);
@@ -81,17 +81,17 @@ public class UpdateProductPriceService : IUpdateProductPriceService
             {
                 var priceMeta = productMetaDetails
                     .Where(x => x.PostId == variantProduct.Id)
-                    .Where(x => x.MetaKey == MetaKeyConstrains.Price)
+                    .Where(x => x.MetaKey == MetaKeyConstans.Price)
                     .FirstOrDefault();
 
                 var regularPriceMeta = productMetaDetails
                     .Where(x => x.PostId == variantProduct.Id)
-                    .Where(x => x.MetaKey == MetaKeyConstrains.RegularPrice)
+                    .Where(x => x.MetaKey == MetaKeyConstans.RegularPrice)
                     .FirstOrDefault();
 
                 var salesPriceMeta = productMetaDetails?
                     .Where(x => x.PostId == variantProduct.Id)?
-                    .Where(x => x.MetaKey == MetaKeyConstrains.SalePrice)?
+                    .Where(x => x.MetaKey == MetaKeyConstans.SalePrice)?
                     .FirstOrDefault();
 
                 var variantMetaLookup = metaLookups.FirstOrDefault(x => x.ProductId == (long)variantProduct.Id);
@@ -122,7 +122,7 @@ public class UpdateProductPriceService : IUpdateProductPriceService
                     await _dbContext.AddAsync(new WpPostmetum
                     {
                         PostId = variantProduct.Id,
-                        MetaKey = MetaKeyConstrains.SalePrice,
+                        MetaKey = MetaKeyConstans.SalePrice,
                         MetaValue = newPromoPrice.ToString(),
                     });
                     //await _productCategoryService.UpdateProductCategory(variantProduct, WpTermSlugConstrains.Promocje);

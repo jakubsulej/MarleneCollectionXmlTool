@@ -1,6 +1,6 @@
 ﻿namespace MarleneCollectionXmlTool.Domain.Utils;
 
-public struct HurtIvonXmlConstrains
+public struct HurtIvonXmlConstans
 {
     public const string Produkt = "produkt";
     public const string Nazwa = "nazwa";

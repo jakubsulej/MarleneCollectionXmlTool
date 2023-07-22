@@ -278,15 +278,15 @@ public class ProductAttributeService : IProductAttributeService
                 if (string.IsNullOrEmpty(attribute)) continue;
 
                 var attributeName = attribute.ToUpper();
-                if (attributeName == HurtIvonXmlConstrains.Green) attributeName = "ZIELONY";
-                if (attributeName == HurtIvonXmlConstrains.Cream) attributeName = "ECRU";
-                if (attributeName == HurtIvonXmlConstrains.Czarna) attributeName = "CZARNY";
-                if (attributeName == HurtIvonXmlConstrains.WPaski) attributeName = "PASKI";
-                if (attributeName == HurtIvonXmlConstrains.Smietankowy) attributeName = "ECRU";
-                if (attributeName == HurtIvonXmlConstrains.DlugiRekaw) attributeName = "DŁUGIE";
-                if (attributeName == HurtIvonXmlConstrains.Rekaw3_4) attributeName = "RĘKAW 3/4";
-                if (attributeName == HurtIvonXmlConstrains.CzarnoBialy) attributeName = "BIAŁO-CZARNY";
-                if (attributeName == HurtIvonXmlConstrains.WPepitke) attributeName = "PEPITKA";
+                if (attributeName == HurtIvonXmlConstans.Green) attributeName = "ZIELONY";
+                if (attributeName == HurtIvonXmlConstans.Cream) attributeName = "ECRU";
+                if (attributeName == HurtIvonXmlConstans.Czarna) attributeName = "CZARNY";
+                if (attributeName == HurtIvonXmlConstans.WPaski) attributeName = "PASKI";
+                if (attributeName == HurtIvonXmlConstans.Smietankowy) attributeName = "ECRU";
+                if (attributeName == HurtIvonXmlConstans.DlugiRekaw) attributeName = "DŁUGIE";
+                if (attributeName == HurtIvonXmlConstans.Rekaw3_4) attributeName = "RĘKAW 3/4";
+                if (attributeName == HurtIvonXmlConstans.CzarnoBialy) attributeName = "BIAŁO-CZARNY";
+                if (attributeName == HurtIvonXmlConstans.WPepitke) attributeName = "PEPITKA";
 
                 var taxonomyId = terms?
                     .Where(x => x.Name.ToUpper() == attributeName)

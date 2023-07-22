@@ -1,6 +1,6 @@
 ﻿namespace MarleneCollectionXmlTool.Domain.Utils;
 
-public struct WpPostConstrains
+public struct WpPostConstans
 {
     public const string Draft = "draft";
     public const string Publish = "publish";

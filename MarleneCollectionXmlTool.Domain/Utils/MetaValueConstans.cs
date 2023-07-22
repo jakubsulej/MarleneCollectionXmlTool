@@ -1,6 +1,6 @@
 ﻿namespace MarleneCollectionXmlTool.Domain.Utils;
 
-public struct MetaValueConstrains
+public struct MetaValueConstans
 {
     public const string OutOfStock = "outofstock";
     public const string InStock = "instock";

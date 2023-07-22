@@ -28,11 +28,11 @@ public class ProductPriceServiceTests
     {
         //Arrange
         var xmlDocument = XmlTestHelper.GetXmlDocumentFromStaticFile("D20-ZIELON-Promo");
-        var xmlProducts = xmlDocument.GetElementsByTagName(HurtIvonXmlConstrains.Produkt);
+        var xmlProducts = xmlDocument.GetElementsByTagName(HurtIvonXmlConstans.Produkt);
         
         var originalWpPostsWithMetas = CreateMockDatabaseObjects(currentPrice, currentRegularPrice, currentSalesPrice);
-        var parentProducts = originalWpPostsWithMetas.Where(x => x.WpPost.PostType == WpPostConstrains.Product).Select(x => x.WpPost).ToList();
-        var variantProducts = originalWpPostsWithMetas.Where(x => x.WpPost.PostType == WpPostConstrains.ProductVariation).Select(x => x.WpPost).ToList();
+        var parentProducts = originalWpPostsWithMetas.Where(x => x.WpPost.PostType == WpPostConstans.Product).Select(x => x.WpPost).ToList();
+        var variantProducts = originalWpPostsWithMetas.Where(x => x.WpPost.PostType == WpPostConstans.ProductVariation).Select(x => x.WpPost).ToList();
         var productMetaDetails = originalWpPostsWithMetas.SelectMany(x => x.WpPostmetum).ToList();
         var metaLookups = originalWpPostsWithMetas.Select(x => x.ProductMetaLookup).ToList();
 
@@ -51,17 +51,17 @@ public class ProductPriceServiceTests
 
         var priceValues = await _dbContext.WpPostmeta
             .Where(x => variantProducts.Select(x => x.Id).Contains(x.PostId))
-            .Where(x => x.MetaKey == MetaKeyConstrains.Price)
+            .Where(x => x.MetaKey == MetaKeyConstans.Price)
             .ToDictionaryAsync(x => x.PostId, x => decimal.Parse(x.MetaValue));
 
         var regularPriceValues = await _dbContext.WpPostmeta
             .Where(x => variantProducts.Select(x => x.Id).Contains(x.PostId))
-            .Where(x => x.MetaKey == MetaKeyConstrains.RegularPrice)
+            .Where(x => x.MetaKey == MetaKeyConstans.RegularPrice)
             .ToDictionaryAsync(x => x.PostId, x => decimal.Parse(x.MetaValue));
 
         var salePriceValues = await _dbContext.WpPostmeta
             .Where(x => variantProducts.Select(x => x.Id).Contains(x.PostId))
-            .Where(x => x.MetaKey == MetaKeyConstrains.SalePrice)
+            .Where(x => x.MetaKey == MetaKeyConstans.SalePrice)
             .ToDictionaryAsync(x => x.PostId, x => decimal.Parse(x.MetaValue));
 
         Assert.True(priceValues.All(x => x.Value == 84.50m));
@@ -86,11 +86,11 @@ public class ProductPriceServiceTests
     {
         //Arrange
         var xmlDocument = XmlTestHelper.GetXmlDocumentFromStaticFile("D20-ZIELON");
-        var xmlProducts = xmlDocument.GetElementsByTagName(HurtIvonXmlConstrains.Produkt);
+        var xmlProducts = xmlDocument.GetElementsByTagName(HurtIvonXmlConstans.Produkt);
 
         var originalWpPostsWithMetas = CreateMockDatabaseObjects(currentPrice, currentRegularPrice, currentSalesPrice);
-        var parentProducts = originalWpPostsWithMetas.Where(x => x.WpPost.PostType == WpPostConstrains.Product).Select(x => x.WpPost).ToList();
-        var variantProducts = originalWpPostsWithMetas.Where(x => x.WpPost.PostType == WpPostConstrains.ProductVariation).Select(x => x.WpPost).ToList();
+        var parentProducts = originalWpPostsWithMetas.Where(x => x.WpPost.PostType == WpPostConstans.Product).Select(x => x.WpPost).ToList();
+        var variantProducts = originalWpPostsWithMetas.Where(x => x.WpPost.PostType == WpPostConstans.ProductVariation).Select(x => x.WpPost).ToList();
         var productMetaDetails = originalWpPostsWithMetas.SelectMany(x => x.WpPostmetum).ToList();
         var metaLookups = originalWpPostsWithMetas.Select(x => x.ProductMetaLookup).ToList();
 
@@ -107,17 +107,17 @@ public class ProductPriceServiceTests
         //Assert
         var priceValues = await _dbContext.WpPostmeta
             .Where(x => variantProducts.Select(x => x.Id).Contains(x.PostId))
-            .Where(x => x.MetaKey == MetaKeyConstrains.Price)
+            .Where(x => x.MetaKey == MetaKeyConstans.Price)
             .ToDictionaryAsync(x => x.PostId, x => decimal.Parse(x.MetaValue));
 
         var regularPriceValues = await _dbContext.WpPostmeta
             .Where(x => variantProducts.Select(x => x.Id).Contains(x.PostId))
-            .Where(x => x.MetaKey == MetaKeyConstrains.RegularPrice)
+            .Where(x => x.MetaKey == MetaKeyConstans.RegularPrice)
             .ToDictionaryAsync(x => x.PostId, x => decimal.Parse(x.MetaValue));
 
         var doesExistPriceValues = await _dbContext.WpPostmeta
             .Where(x => variantProducts.Select(x => x.Id).Contains(x.PostId))
-            .Where(x => x.MetaKey == MetaKeyConstrains.SalePrice)
+            .Where(x => x.MetaKey == MetaKeyConstans.SalePrice)
             .AnyAsync();
 
         var minPriceLookup = await _dbContext.WpWcProductMetaLookups

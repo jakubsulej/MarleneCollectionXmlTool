@@ -20,7 +20,7 @@ public class CountTotalNumberOfUniqueItemsRequestHandler : IRequestHandler<Count
         try
         {
             var xmlDoc = await _wholesalerService.GetXmlDocumentNestedVariantsXmlUrl(cancellationToken);
-            var xmlProducts = xmlDoc.GetElementsByTagName(HurtIvonXmlConstrains.Produkt);
+            var xmlProducts = xmlDoc.GetElementsByTagName(HurtIvonXmlConstans.Produkt);
 
             var uniqueSkus = new List<string>();
 
@@ -28,7 +28,7 @@ public class CountTotalNumberOfUniqueItemsRequestHandler : IRequestHandler<Count
             {
                 foreach (XmlNode child in xmlProduct.ChildNodes)
                 {
-                    if (child.Name == HurtIvonXmlConstrains.KodKatalogowy)
+                    if (child.Name == HurtIvonXmlConstans.KodKatalogowy)
                     {
                         uniqueSkus.Add(child.Value.Trim());
                         break;
