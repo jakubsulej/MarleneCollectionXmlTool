@@ -16,10 +16,7 @@ public class ImageService : IImageService
 {
     private readonly HttpClient _httpClient;
 
-    public ImageService(
-        IConfiguration configuration,
-        IWoocommerceRestApiService woocommerceRestApiService,
-        WoocommerceDbContext dbContext)
+    public ImageService()
     {
         _httpClient = new HttpClient();
     }

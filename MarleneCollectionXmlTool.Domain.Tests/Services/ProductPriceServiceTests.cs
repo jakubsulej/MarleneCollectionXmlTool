@@ -13,12 +13,12 @@ namespace MarleneCollectionXmlTool.Domain.Tests.Services;
 public class ProductPriceServiceTests
 {
     private readonly WoocommerceDbContext _dbContext;
-    private readonly UpdateProductPriceService _sut;
+    private readonly ProductPriceService _sut;
 
     public ProductPriceServiceTests()
     {
         _dbContext = FakeDbContextFactory.CreateMockDbContext<WoocommerceDbContext>();
-        _sut = new UpdateProductPriceService(_dbContext, new ProductPromoPriceValueProvider(), A.Fake<IProductCategoryService>());
+        _sut = new ProductPriceService(_dbContext, new ProductPromoPriceValueProvider(), A.Fake<IProductCategoryService>());
     }
 
     [Theory]

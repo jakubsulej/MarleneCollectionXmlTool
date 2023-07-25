@@ -1,5 +1,6 @@
 ﻿using FakeItEasy;
 using MarleneCollectionXmlTool.DBAccessLayer;
+using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales;
 using MarleneCollectionXmlTool.Domain.Commands.SyncProductStocksWithWholesales.Models;
@@ -26,10 +27,12 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         var productAttributeHelper = A.Fake<IProductAttributeService>();
         A.CallTo(() => productAttributeHelper.CreateProductAttributesString(A<WpPostDto>._, A<List<WpPostDto>>._)).Returns(string.Empty);      
         var configuration = A.Fake<IConfiguration>();
-        var productPriceService = A.Fake<IUpdateProductPriceService>();
+        var productPriceService = A.Fake<IProductPriceService>();
         var configurationArrayProvider = new ConfigurationArrayProvider(configuration);
         var syncProductWithWholesalerService = new SyncWoocommerceProductsWithWholesalerService(configuration, productAttributeHelper, configurationArrayProvider, _dbContext);
-        _sut = new SyncProductStocksWithWholesalerRequestHandler(syncProductWithWholesalerService, _wholesalerService, configurationArrayProvider, productPriceService, _dbContext);
+        var productStockStatusService = new ProductStockStatusService(configurationArrayProvider);
+        var productCategoryService = new ProductCategoryService(A.Fake<ICacheProvider>(), _dbContext);
+        _sut = new SyncProductStocksWithWholesalerRequestHandler(syncProductWithWholesalerService, _wholesalerService, productStockStatusService, productPriceService, productCategoryService, _dbContext);
     }
 
     /// <summary>D20-ZIELON.xml</summary>

@@ -1,50 +1,76 @@
 ﻿using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
+using MarleneCollectionXmlTool.Domain.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 
 public interface IProductCategoryService
 {
-    Task RemoveProductCategory(WpPost wpPost, string termSlug);
-    Task UpdateProductCategory(WpPost parentPosts, string termSlug);
+    Task AddProductsToPromoCategory(List<WpPost> parentProducts, List<WpPost> allVariantProducts, List<WpPostmetum> productMetaDetails);
 }
 
 public class ProductCategoryService : IProductCategoryService
 {
-    private readonly ICacheProvider _cacheProvider;
+    private readonly List<WpTerm> _wpTerms;
     private readonly WoocommerceDbContext _dbContext;
 
     public ProductCategoryService(ICacheProvider cacheProvider, WoocommerceDbContext dbContext)
     {
-        _cacheProvider = cacheProvider;
+        _wpTerms = cacheProvider.GetAllWpTerms();
         _dbContext = dbContext;
     }
 
-    public async Task UpdateProductCategory(WpPost wpPost, string termSlug)
+    public async Task AddProductsToPromoCategory(List<WpPost> parentProducts, List<WpPost> allVariantProducts, List<WpPostmetum> productMetaDetails)
     {
-        var wpTerms = _cacheProvider.GetAllWpTerms();
-        var termCategoryId = wpTerms.FirstOrDefault(x => x.Slug == termSlug.ToLower()).TermId;
-
-        await _dbContext.AddAsync(new WpTermRelationship
-        {
-            ObjectId = wpPost.Id,
-            TermTaxonomyId = termCategoryId,
-            TermOrder = 0
-        });
-    }
-
-    public async Task RemoveProductCategory(WpPost wpPost, string termSlug)
-    {
-        var wpTerms = _cacheProvider.GetAllWpTerms();
-        var termCategoryId = wpTerms.FirstOrDefault(x => x.Slug == termSlug.ToLower()).TermId;
-
-        var relationship = await _dbContext.WpTermRelationships
-            .Where(x => x.ObjectId == wpPost.Id)
+        var termCategoryId = _wpTerms.FirstOrDefault(x => x.Slug == WpTermSlugConstans.Promocje.ToLower()).TermId;
+        var currentlyInPromoCategory = await _dbContext.WpTermRelationships
             .Where(x => x.TermTaxonomyId == termCategoryId)
-            .FirstOrDefaultAsync();
+            .ToListAsync();
 
-        _dbContext.Remove(relationship);
+        var currentlyInPromoCategoryIds = currentlyInPromoCategory.Select(x => x.ObjectId).ToList();
+
+        var onSaleVariantIds = productMetaDetails
+            .Where(x => !currentlyInPromoCategoryIds.Contains(x.PostId))
+            .Where(x => x.MetaKey == MetaKeyConstans.SalePrice)
+            .Where(x => string.IsNullOrWhiteSpace(x.MetaValue))
+            .Select(x => x.PostId);
+
+        var onSaleVariantProducts = allVariantProducts
+            .Where(x => !currentlyInPromoCategoryIds.Contains(x.Id))
+            .Where(x => onSaleVariantIds.Contains(x.Id))
+            .Distinct()
+            .ToList();
+
+        var onSaleParentIds = onSaleVariantProducts.Select(y => y.PostParent).Distinct();
+        var onSaleParentProducts = parentProducts
+            .Where(x => onSaleParentIds.Contains(x.Id))
+            .Distinct()
+            .ToList();
+
+        var onSaleProducts = new List<WpPost>();
+        onSaleProducts.AddRange(allVariantProducts);
+        onSaleProducts.AddRange(onSaleParentProducts);
+
+        foreach (var product in onSaleProducts)
+        {
+            currentlyInPromoCategory.Add(new WpTermRelationship
+            {
+                ObjectId = product.Id,
+                TermTaxonomyId = termCategoryId,
+                TermOrder = 0
+            });
+        }
+
+        var notMoreOnSaleProductIds = currentlyInPromoCategoryIds
+            .Except(onSaleProducts.Select(x => x.Id))
+            .ToList();
+
+        foreach (var productId in notMoreOnSaleProductIds)
+        {
+            var relationship = currentlyInPromoCategory.FirstOrDefault(x => x.ObjectId == productId);
+            currentlyInPromoCategory.Remove(relationship);
+        }
     }
 }

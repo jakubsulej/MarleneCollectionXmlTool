@@ -51,18 +51,21 @@ public static class ServiceCollectionExtensions
 
     private static void AddCommonServices(this IServiceCollection services)
     {
+        //MediatR services
         var thisAssemblyMarker = typeof(ServiceCollectionExtensions).Assembly;
         services.AddMediatR(thisAssemblyMarker);
 
         //Business services
+        services.AddSingleton<IConfigurationArrayProvider, ConfigurationArrayProvider>();
+        services.AddSingleton<IProductPromoPriceValueProvider, ProductPromoPriceValueProvider>();
         services.AddScoped<IProductAttributeService, ProductAttributeService>();
         services.AddScoped<IImageService, ImageService>();
         services.AddScoped<IWoocommerceRestApiService, WoocommerceRestApiService>();
-        services.AddSingleton<IConfigurationArrayProvider, ConfigurationArrayProvider>();
-        services.AddScoped<IUpdateProductPriceService, UpdateProductPriceService>();
-        services.AddSingleton<IProductPromoPriceValueProvider, ProductPromoPriceValueProvider>();
+        services.AddScoped<IProductPriceService, ProductPriceService>();
         services.AddScoped<IProductCategoryService, ProductCategoryService>();
         services.AddScoped<ISyncWoocommerceProductsWithWholesalerService, SyncWoocommerceProductsWithWholesalerService>();
+        services.AddScoped<IProductStockStatusService, ProductStockStatusService>();
+        services.AddScoped<IProductCategoryService, ProductCategoryService>();
 
         //Cache services
         services.AddScoped<ICacheProvider, CacheProvider>();

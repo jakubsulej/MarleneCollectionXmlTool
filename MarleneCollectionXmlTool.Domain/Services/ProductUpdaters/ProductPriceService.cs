@@ -1,5 +1,4 @@
-﻿using Google.Protobuf.WellKnownTypes;
-using MarleneCollectionXmlTool.DBAccessLayer;
+﻿using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Helpers.Providers;
 using MarleneCollectionXmlTool.Domain.Utils;
@@ -8,18 +7,18 @@ using System.Xml;
 
 namespace MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 
-public interface IUpdateProductPriceService
+public interface IProductPriceService
 {
     Task<int> UpdateProductPrices(List<WpPost> parentProducts, List<WpPost> allVariantProducts, List<WpPostmetum> productMetaDetails, XmlNodeList xmlProducts);
 }
 
-public class UpdateProductPriceService : IUpdateProductPriceService
+public class ProductPriceService : IProductPriceService
 {
     private readonly WoocommerceDbContext _dbContext;
     private readonly IProductPromoPriceValueProvider _priceValueProvider;
     private readonly IProductCategoryService _productCategoryService;
 
-    public UpdateProductPriceService(
+    public ProductPriceService(
         WoocommerceDbContext dbContext, 
         IProductPromoPriceValueProvider priceValueProvider,
         IProductCategoryService productCategoryService)
@@ -58,11 +57,6 @@ public class UpdateProductPriceService : IUpdateProductPriceService
             var productId = parentMetaLookup.ProductId;
 
             var parentPost = parentProducts.FirstOrDefault(x => x.Id == (ulong)productId);
-
-            //if (promoPrice != null)
-            //    await _productCategoryService.UpdateProductCategory(parentPost, WpTermSlugConstrains.Promocje);
-            //else if (promoPrice == null && parentMetaLookup.MinPrice < parentMetaLookup.MaxPrice)
-            //    await _productCategoryService.RemoveProductCategory(parentPost, WpTermSlugConstrains.Promocje);
 
             var parentPriceMeta = productMetaDetails?
                 .Where(x => x.PostId == (ulong)productId)?
@@ -115,7 +109,6 @@ public class UpdateProductPriceService : IUpdateProductPriceService
                 if (newPromoPrice != null && salesPriceMeta != null)
                 {
                     salesPriceMeta.MetaValue = newPromoPrice.ToString();
-                    //await _productCategoryService.UpdateProductCategory(variantProduct, WpTermSlugConstrains.Promocje);
                 }
                 else if (newPromoPrice != null && salesPriceMeta == null) 
                 {
@@ -125,12 +118,10 @@ public class UpdateProductPriceService : IUpdateProductPriceService
                         MetaKey = MetaKeyConstans.SalePrice,
                         MetaValue = newPromoPrice.ToString(),
                     });
-                    //await _productCategoryService.UpdateProductCategory(variantProduct, WpTermSlugConstrains.Promocje);
                 }
                 else if (salesPriceMeta != null)
                 {
                     _dbContext.Remove(salesPriceMeta);
-                    //await _productCategoryService.RemoveProductCategory(variantProduct, WpTermSlugConstrains.Promocje);
                 }
 
                 index++;
