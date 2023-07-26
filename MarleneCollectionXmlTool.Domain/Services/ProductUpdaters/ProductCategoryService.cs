@@ -34,8 +34,8 @@ public class ProductCategoryService : IProductCategoryService
         var onSaleVariantIds = productMetaDetails
             .Where(x => !currentlyInPromoCategoryIds.Contains(x.PostId))
             .Where(x => x.MetaKey == MetaKeyConstans.SalePrice)
-            .Where(x => string.IsNullOrWhiteSpace(x.MetaValue))
-            .Select(x => x.PostId);
+            .Select(x => x.PostId)
+            .ToList();
 
         var onSaleVariantProducts = allVariantProducts
             .Where(x => !currentlyInPromoCategoryIds.Contains(x.Id))
@@ -50,12 +50,12 @@ public class ProductCategoryService : IProductCategoryService
             .ToList();
 
         var onSaleProducts = new List<WpPost>();
-        onSaleProducts.AddRange(allVariantProducts);
+        onSaleProducts.AddRange(onSaleVariantProducts);
         onSaleProducts.AddRange(onSaleParentProducts);
 
         foreach (var product in onSaleProducts)
         {
-            currentlyInPromoCategory.Add(new WpTermRelationship
+            _dbContext.WpTermRelationships.Add(new WpTermRelationship
             {
                 ObjectId = product.Id,
                 TermTaxonomyId = termCategoryId,
@@ -70,7 +70,7 @@ public class ProductCategoryService : IProductCategoryService
         foreach (var productId in notMoreOnSaleProductIds)
         {
             var relationship = currentlyInPromoCategory.FirstOrDefault(x => x.ObjectId == productId);
-            currentlyInPromoCategory.Remove(relationship);
+            _dbContext.WpTermRelationships.Remove(relationship);
         }
     }
 }

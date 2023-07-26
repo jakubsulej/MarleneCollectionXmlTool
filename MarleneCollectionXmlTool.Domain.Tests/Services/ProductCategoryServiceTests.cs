@@ -1,10 +1,12 @@
 ﻿using FakeItEasy;
+using FluentAssertions;
 using MarleneCollectionXmlTool.DBAccessLayer;
 using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.DBAccessLayer.Models;
 using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MarleneCollectionXmlTool.Domain.Tests.Utils;
 using MarleneCollectionXmlTool.Domain.Utils;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace MarleneCollectionXmlTool.Domain.Tests.Services;
@@ -26,51 +28,158 @@ public class ProductCategoryServiceTests
     }
 
     [Fact]
-    public async Task AddProductsToPromoCategory_AddAllToPromoAndRemoveAllThatAreNotPromo()
+    public async Task DatabaseProductAreOnSaleNewProductAreNotOnSale_RemoveProductsThatAreNotOnSale()
     {
         //Arrange
-        var databaseWpPostsWithMetas = CreateMockDatabaseObjects();
-        var databaseParentProducts = databaseWpPostsWithMetas.Where(x => x.WpPost.PostType == WpPostConstans.Product).Select(x => x.WpPost).ToList();
-        var databaseVariantProducts = databaseWpPostsWithMetas.Where(x => x.WpPost.PostType == WpPostConstans.ProductVariation).Select(x => x.WpPost).ToList();
-        var databaseProductMetaDetails = databaseWpPostsWithMetas.SelectMany(x => x.WpPostmetum).ToList();      
-        var termRelationships = databaseWpPostsWithMetas.Select(postWithMeta => new WpTermRelationship(postWithMeta.WpPost.Id, _wpTerm.TermId));        
+        var wpPostsWithMetasMock = CreateMockDatabaseObjects();
+        var noSaleParentPostId = (ulong)wpPostsWithMetasMock.Select(x => x.ProductMetaLookup).FirstOrDefault(x => x.Sku == "D20-ZIELON")!.ProductId;
+        var saleParentPostId = (ulong)wpPostsWithMetasMock.Select(x => x.ProductMetaLookup).FirstOrDefault(x => x.Sku == "D8-BORDO")!.ProductId;
+
+        var databaseParentProducts = wpPostsWithMetasMock
+            .Where(x => x.WpPost.PostType == WpPostConstans.Product)
+            .Where(x => x.WpPost.Id == noSaleParentPostId)
+            .Select(x => x.WpPost)
+            .ToList();
+
+        var databaseVariantProducts = wpPostsWithMetasMock
+            .Where(x => x.WpPost.PostType == WpPostConstans.ProductVariation)
+            .Where(x => x.WpPost.PostParent == noSaleParentPostId)
+            .Select(x => x.WpPost)
+            .ToList();
+
+        var databaseProductMetaDetails = wpPostsWithMetasMock
+            .Where(x => x.WpPost.PostParent == noSaleParentPostId || x.WpPost.Id == noSaleParentPostId)
+            .SelectMany(x => x.WpPostmetum)
+            .ToList();
+
+        var existingTermRelationships = wpPostsWithMetasMock
+            .Where(x => x.WpPost.PostParent == noSaleParentPostId || x.WpPost.Id == noSaleParentPostId)
+            .Select(postWithMeta => new WpTermRelationship(postWithMeta.WpPost.Id, _wpTerm.TermId));        
 
         await _dbContext.AddRangeAsync(databaseParentProducts);
         await _dbContext.AddRangeAsync(databaseVariantProducts);
         await _dbContext.AddRangeAsync(databaseProductMetaDetails);
-        await _dbContext.AddRangeAsync(termRelationships);
+        await _dbContext.AddRangeAsync(existingTermRelationships);
         await _dbContext.SaveChangesAsync();
 
-        var wpPostWithMetas = CreateMockDatabaseObjects();
-        var parentProducts = wpPostWithMetas.Where(x => x.WpPost.PostType == WpPostConstans.Product).Select(x => x.WpPost).ToList();
-        var variantProducts = wpPostWithMetas.Where(x => x.WpPost.PostType == WpPostConstans.ProductVariation).Select(x => x.WpPost).ToList();
-        var productMetaDetails = wpPostWithMetas.SelectMany(x => x.WpPostmetum).ToList();
+        var parentProducts = wpPostsWithMetasMock
+            .Where(x => x.WpPost.PostType == WpPostConstans.Product)
+            .Where(x => x.WpPost.Id == saleParentPostId)
+            .Select(x => x.WpPost)
+            .ToList();
+
+        var variantProducts = wpPostsWithMetasMock
+            .Where(x => x.WpPost.PostType == WpPostConstans.ProductVariation)
+            .Where(x => x.WpPost.PostParent == saleParentPostId)
+            .Select(x => x.WpPost)
+            .ToList();
+
+        var productMetaDetails = wpPostsWithMetasMock
+            .Where(x => x.WpPost.PostParent == saleParentPostId || x.WpPost.Id == saleParentPostId)
+            .SelectMany(x => x.WpPostmetum)
+            .ToList();
 
         //Act
         await _sut.AddProductsToPromoCategory(parentProducts, variantProducts, productMetaDetails);
+        await _dbContext.SaveChangesAsync();
 
         //Assert
+        var wpTermRelationships = await _dbContext.WpTermRelationships.ToListAsync();
+        
+        var onSaleProductIds = variantProducts.Select(x => x.Id).ToList();
+        onSaleProductIds.AddRange(parentProducts.Select(x => x.Id));
+
+        var notOnSaleProductIds = databaseParentProducts.Select(x => x.Id).ToList();
+        notOnSaleProductIds.AddRange(databaseVariantProducts.Select(x => x.Id));
+
+        Assert.Equal(onSaleProductIds.Count, wpTermRelationships.Count);
+        onSaleProductIds.Should().BeEquivalentTo(wpTermRelationships.Select(x => x.ObjectId));
+        notOnSaleProductIds.Should().NotBeEquivalentTo(wpTermRelationships.Select(wpTermRel => wpTermRel.ObjectId));
+    }
+
+    [Fact]
+    public async Task DatabaseProductAreOnSaleAndNewOnesAreNot_DatabaseProductsShouldBeRemovedFromSale()
+    {
+        //Arrange
+        var wpPostsWithMetasMock = CreateMockDatabaseObjects();
+        var noSaleParentPostId = (ulong)wpPostsWithMetasMock.Select(x => x.ProductMetaLookup).FirstOrDefault(x => x.Sku == "D20-ZIELON")!.ProductId;
+        var saleParentPostId = (ulong)wpPostsWithMetasMock.Select(x => x.ProductMetaLookup).FirstOrDefault(x => x.Sku == "D8-BORDO")!.ProductId;
+
+        var databaseParentProducts = wpPostsWithMetasMock
+            .Where(x => x.WpPost.PostType == WpPostConstans.Product)
+            .Where(x => x.WpPost.Id == saleParentPostId)
+            .Select(x => x.WpPost)
+            .ToList();
+
+        var databaseVariantProducts = wpPostsWithMetasMock
+            .Where(x => x.WpPost.PostType == WpPostConstans.ProductVariation)
+            .Where(x => x.WpPost.PostParent == saleParentPostId)
+            .Select(x => x.WpPost)
+            .ToList();
+
+        var databaseProductMetaDetails = wpPostsWithMetasMock
+            .Where(x => x.WpPost.PostParent == saleParentPostId || x.WpPost.Id == saleParentPostId)
+            .SelectMany(x => x.WpPostmetum)
+            .ToList();
+
+        var existingTermRelationships = wpPostsWithMetasMock
+            .Where(x => x.WpPost.PostParent == saleParentPostId || x.WpPost.Id == saleParentPostId)
+            .Select(postWithMeta => new WpTermRelationship(postWithMeta.WpPost.Id, _wpTerm.TermId));
+
+        await _dbContext.AddRangeAsync(databaseParentProducts);
+        await _dbContext.AddRangeAsync(databaseVariantProducts);
+        await _dbContext.AddRangeAsync(databaseProductMetaDetails);
+        await _dbContext.AddRangeAsync(existingTermRelationships);
+        await _dbContext.SaveChangesAsync();
+
+        var parentProducts = new List<WpPost>();
+        var variantProducts = new List<WpPost>();
+        var productMetaDetails = new List<WpPostmetum>();
+
+        //Act
+        await _sut.AddProductsToPromoCategory(parentProducts, variantProducts, productMetaDetails);
+        await _dbContext.SaveChangesAsync();
+
+        //Assert
+        var wpTermRelationships = await _dbContext.WpTermRelationships.ToListAsync();
+
+        var onSaleProductIds = variantProducts.Select(x => x.Id).ToList();
+        onSaleProductIds.AddRange(parentProducts.Select(x => x.Id));
+
+        var notOnSaleProductIds = databaseParentProducts.Select(x => x.Id).ToList();
+        notOnSaleProductIds.AddRange(databaseVariantProducts.Select(x => x.Id));
+
+        Assert.Equal(onSaleProductIds.Count, wpTermRelationships.Count);
+        onSaleProductIds.Should().BeEquivalentTo(wpTermRelationships.Select(x => x.ObjectId));
+        notOnSaleProductIds.Should().NotBeEquivalentTo(wpTermRelationships.Select(wpTermRel => wpTermRel.ObjectId));
     }
 
     private static List<MockDataHelper.WpPostWithMeta> CreateMockDatabaseObjects()
     {
-        var price = "123";
-        var regularPrice = "123";
-        var salesPrice = "123";
-
         var variantTree = new Dictionary<string, List<MockDataHelper.FakeProductVariableValues>>
         {
             {
                 "D20-ZIELON",
                 new List<MockDataHelper.FakeProductVariableValues>
                 {
-                    new MockDataHelper.FakeProductVariableValues(Sku: "5908214227099", AttributeRozmiar: "xs-s", Stock: "3", Price: price, RegularPrice: regularPrice, SalesPrice: salesPrice, StockStatus: "instock"),
-                    new MockDataHelper.FakeProductVariableValues(Sku: "5908214227082", AttributeRozmiar: "m-l", Stock: "5", Price: price, RegularPrice: regularPrice, SalesPrice: salesPrice, StockStatus: "instock"),
-                    new MockDataHelper.FakeProductVariableValues(Sku: "5908214231799", AttributeRozmiar: "xl-xxl", Stock: "11", Price: price, RegularPrice: regularPrice, SalesPrice: salesPrice, StockStatus: "instock"),
-                    new MockDataHelper.FakeProductVariableValues(Sku: "590821423180", AttributeRozmiar: "3xl-4xl", Stock: "0", Price: price , RegularPrice: regularPrice, SalesPrice: salesPrice, StockStatus: "outofstock"),
-                    new MockDataHelper.FakeProductVariableValues(Sku: "5908214231812", AttributeRozmiar: "5xl-6xl", Stock: "0", Price: price, RegularPrice: regularPrice, SalesPrice: salesPrice, StockStatus: "outofstock"),
+                    new MockDataHelper.FakeProductVariableValues("5908214227099", "xs-s", "3", Price: "123", RegularPrice: "123", SalesPrice: null, "instock"),
+                    new MockDataHelper.FakeProductVariableValues("5908214227082", "m-l", "5", Price: "123", RegularPrice: "123", SalesPrice: null, "instock"),
+                    new MockDataHelper.FakeProductVariableValues("5908214231799", "xl-xxl", "11", Price: "123", RegularPrice: "123", SalesPrice: null, "instock"),
+                    new MockDataHelper.FakeProductVariableValues("590821423180", "3xl-4xl", "0", Price: "123" , RegularPrice: "123", SalesPrice: null, "outofstock"),
+                    new MockDataHelper.FakeProductVariableValues("5908214231812", "5xl-6xl", "0", Price: "123", RegularPrice: "123", SalesPrice: null, "outofstock"),
                 }
             },
+            {
+                "D8-BORDO",
+                new List<MockDataHelper.FakeProductVariableValues>
+                {
+                    new MockDataHelper.FakeProductVariableValues("5908214227303", "xs-s", "3", Price: "123", RegularPrice: "123", SalesPrice: "123", "instock"),
+                    new MockDataHelper.FakeProductVariableValues("5908214227297", "m-l", "5", Price: "123", RegularPrice: "123", SalesPrice: "123", "instock"),
+                    new MockDataHelper.FakeProductVariableValues("5908214231942", "xl-xxl", "11", Price: "123", RegularPrice: "123", SalesPrice: "123", "instock"),
+                    new MockDataHelper.FakeProductVariableValues("590821423195", "3xl-4xl", "0", Price: "123" , RegularPrice: "123", SalesPrice: "123", "outofstock"),
+                    new MockDataHelper.FakeProductVariableValues("5908214231966", "5xl-6xl", "0", Price: "123", RegularPrice: "123", SalesPrice: "123", "outofstock"),
+                }
+            }
         };
 
         var originalWpPostsWithMetas = MockDataHelper.GetFakeProductWithVariations(variantTree);

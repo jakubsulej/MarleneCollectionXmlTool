@@ -85,7 +85,7 @@ internal static class MockDataHelper
             {
                 var variantId = lastPostId;
 
-                postsWithMeta.Add(new WpPostWithMeta
+                var variantPostsWithMeta = new WpPostWithMeta
                 (
                     new WpPost
                     {
@@ -108,8 +108,7 @@ internal static class MockDataHelper
                         new WpPostmetum(variantId, MetaKeyConstans.AttributePaRozmiar, variantTree[product.Key][variantIndex].AttributeRozmiar),
                         new WpPostmetum(variantId, MetaKeyConstans.Sku, variantTree[product.Key][variantIndex].Sku),
                         new WpPostmetum(variantId, MetaKeyConstans.RegularPrice, variantTree[product.Key][variantIndex].Price),
-                        new WpPostmetum(variantId, MetaKeyConstans.Price, variantTree[product.Key][variantIndex].Price),
-                        new WpPostmetum(variantId, MetaKeyConstans.SalePrice, variantTree[product.Key][variantIndex].SalesPrice),
+                        new WpPostmetum(variantId, MetaKeyConstans.Price, variantTree[product.Key][variantIndex].Price)
                     },
                     new WpWcProductMetaLookup
                     {
@@ -127,7 +126,15 @@ internal static class MockDataHelper
                         TotalSales = 0,
                         TaxStatus = MetaValueConstans.Taxable
                     }
-                ));
+                );
+
+                if (variantTree[product.Key][variantIndex].SalesPrice != null)
+                {
+                    variantPostsWithMeta.WpPostmetum
+                        .Add(new WpPostmetum(variantId, MetaKeyConstans.SalePrice, variantTree[product.Key][variantIndex].SalesPrice));
+                }
+
+                postsWithMeta.Add(variantPostsWithMeta);
 
                 variantIndex++;
                 lastPostId++;
