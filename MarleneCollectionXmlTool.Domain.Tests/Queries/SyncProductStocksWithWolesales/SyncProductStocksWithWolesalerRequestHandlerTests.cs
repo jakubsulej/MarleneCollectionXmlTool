@@ -8,6 +8,7 @@ using MarleneCollectionXmlTool.Domain.Helpers.Providers;
 using MarleneCollectionXmlTool.Domain.Services.ClientSevices;
 using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MarleneCollectionXmlTool.Domain.Tests.Utils;
+using MarleneCollectionXmlTool.Domain.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Xunit;
@@ -30,8 +31,10 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         var productPriceService = A.Fake<IProductPriceService>();
         var configurationArrayProvider = new ConfigurationArrayProvider(configuration);
         var syncProductWithWholesalerService = new SyncWoocommerceProductsWithWholesalerService(configuration, productAttributeHelper, configurationArrayProvider, _dbContext);
-        var productStockStatusService = new ProductStockStatusService(configurationArrayProvider);
-        var productCategoryService = new ProductCategoryService(A.Fake<ICacheProvider>(), _dbContext);
+        var productStockStatusService = new ProductStockStatusService(configurationArrayProvider);        
+        var cacheProvider = A.Fake<ICacheProvider>();
+        A.CallTo(() => cacheProvider.GetAllWpTerms()).Returns(new List<WpTerm> { new WpTerm { TermId = 1, Name = WpTermSlugConstans.Promocje, Slug = WpTermSlugConstans.Promocje } });
+        var productCategoryService = new ProductCategoryService(cacheProvider, _dbContext);   
         _sut = new SyncProductStocksWithWholesalerRequestHandler(syncProductWithWholesalerService, _wholesalerService, productStockStatusService, productPriceService, productCategoryService, _dbContext);
     }
 
