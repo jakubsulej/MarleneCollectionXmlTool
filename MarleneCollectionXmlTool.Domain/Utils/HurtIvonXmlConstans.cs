@@ -3,6 +3,7 @@
 public struct HurtIvonXmlConstans
 {
     public const string Produkt = "produkt";
+    public const string Id = "id";
     public const string Nazwa = "nazwa";
     public const string KodKatalogowy = "kod_katalogowy";
     public const string Opis = "opis";

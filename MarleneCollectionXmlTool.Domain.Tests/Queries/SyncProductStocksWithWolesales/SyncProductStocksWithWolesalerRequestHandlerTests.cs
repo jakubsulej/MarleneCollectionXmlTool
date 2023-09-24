@@ -12,6 +12,7 @@ using MarleneCollectionXmlTool.Domain.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Xunit;
+using static MarleneCollectionXmlTool.Domain.Tests.Queries.SyncProductStocksWithWolesales.VariantDetailsAssertion;
 
 namespace MarleneCollectionXmlTool.Domain.Tests.Queries.SyncProductStocksWithWolesales;
 
@@ -301,21 +302,76 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         AssertVariantDetails("dummy post title", "dummy post name", 0, "outofstock", "5xl-6xl", 123, "5908214231812", variantDetails);
     }
 
-    private static void AssertVariantDetails(
-        string postTitle, string postName, int stock, string stockStatus, string attributeRozmiar, decimal price, string variantSku,
-        Dictionary<string, (string postTitle, string postName, int stock, string stockStatus, string attributeRozmiar, decimal price)> variantDetails)
+    /// <summary>B53-CZARNY.xml</summary>
+    [Fact]
+    public async Task WholesalerHasProductWithoutVariantSkuField_MissingAllVariantsAreAddedWithVariantIdAsSku()
     {
-        Assert.Equal(postTitle, variantDetails[variantSku].postTitle);
-        Assert.Equal(postName, variantDetails[variantSku].postName);
-        Assert.Equal(stock, variantDetails[variantSku].stock);
-        Assert.Equal(stockStatus, variantDetails[variantSku].stockStatus);
-        Assert.Equal(attributeRozmiar, variantDetails[variantSku].attributeRozmiar);
-        Assert.Equal(price, variantDetails[variantSku].price);
+        //Arrange
+        var expectedParentSku = "B53-CZARNY";
+        var cancellationToken = new CancellationToken();
+
+        var originalWpPostsWithMetas = MockDataHelper.GetFakeProductWithVariations();
+        var originalWpPosts = originalWpPostsWithMetas.Select(x => x.WpPost).ToList();
+        var originalWpMetas = originalWpPostsWithMetas.SelectMany(x => x.WpPostmetum).ToList();
+        _dbContext.SeedRange(originalWpPosts);
+        _dbContext.SeedRange(originalWpMetas);
+
+        var xmlDocument = XmlTestHelper.GetXmlDocumentFromStaticFile(expectedParentSku);
+        A.CallTo(() => _wholesalerService.GetXmlDocumentNestedVariantsXmlUrl(A<CancellationToken>._)).Returns(xmlDocument);
+
+        //Act
+        var response = await _sut.Handle(new SyncProductStocksWithWholesalerRequest(), cancellationToken);
+
+        //Assert
+        var wpPosts = await _dbContext.WpPosts.ToListAsync();
+        var wpMetas = await _dbContext.WpPostmeta.ToListAsync();
+        var parentPostId = wpMetas.Where(x => x.MetaKey == MetaKeyConstans.Sku).Where(x => x.MetaValue == expectedParentSku).First().PostId;
+        var parentPost = wpPosts.Where(x => x.PostType == "product").Where(x => x.Id == parentPostId).First();
+
+        var variantPosts = wpPosts?
+            .Where(x => x.PostParent == parentPost?.Id)?
+            .ToList();
+
+        var skus = wpMetas?
+            .Where(x => x.MetaKey == MetaKeyConstans.Sku)?
+            .Select(x => new { x.PostId, x.MetaValue })?
+            .Where(x => !string.IsNullOrEmpty(x.MetaValue))?
+            .Where(x => variantPosts!.Select(y => y.Id).Contains(x.PostId))
+            .ToDictionary(x => x.PostId, x => x.MetaValue);
+
+        var parentStockStatus = wpMetas?
+            .Where(x => x.PostId == parentPost?.Id)?
+            .Where(x => x.MetaKey == MetaKeyConstans.StockStatus)
+            .Where(x => !string.IsNullOrEmpty(x.MetaValue))
+            .FirstOrDefault()?
+            .MetaValue;
+
+        Assert.True(response.IsSuccess);
+        Assert.Equal("instock", parentStockStatus);
+
+        var variantDetails = GetVariantDetails(wpMetas, parentPost, variantPosts, skus);
+        AssertVariantDetails("Czarna koszula Emilie ze złotymi guzikami - S/M", "czarna-koszula-emilie-ze-złotymi-guzikami-s-m", 5, "instock", "s-m", 199, "1328-S/M", variantDetails);
+        AssertVariantDetails("Czarna koszula Emilie ze złotymi guzikami - L/XL", "czarna-koszula-emilie-ze-złotymi-guzikami-l-xl", 5, "instock", "l-xl", 199, "1328-L/XL", variantDetails);
+        AssertVariantDetails("Czarna koszula Emilie ze złotymi guzikami - 2XL/3XL", "czarna-koszula-emilie-ze-złotymi-guzikami-2xl-3xl", 5, "instock", "2xl-3xl", 199, "1328-2XL/3XL", variantDetails);
+        AssertVariantDetails("Czarna koszula Emilie ze złotymi guzikami - 4XL/5XL", "czarna-koszula-emilie-ze-złotymi-guzikami-4xl-5xl", 5, "instock", "4xl-5xl", 199, "1328-4XL/5XL", variantDetails);
     }
 
-    private static Dictionary<string, (string postTitle, string postName, int stock, string stockStatus, string attributeRozmiar, decimal price)> GetVariantDetails(List<WpPostmetum>? wpMetas, WpPost? parentPost, List<WpPost>? variantPosts, Dictionary<ulong, string>? skus)
+    private static void AssertVariantDetails(
+        string postTitle, string postName, int stock, string stockStatus, string attributeRozmiar, decimal price, string variantSku,
+        VariantDetailsAssertion variantDetails)
     {
-        var variantDetails = new Dictionary<string, (string postTitle, string postName, int stock, string stockStatus, string attributeRozmiar, decimal price)>();
+        Assert.Equal(postTitle, variantDetails.VariantDetails[variantSku].PostTitle);
+        Assert.Equal(postName, variantDetails.VariantDetails[variantSku].PostName);
+        Assert.Equal(stock, variantDetails.VariantDetails[variantSku].Stock);
+        Assert.Equal(stockStatus, variantDetails.VariantDetails[variantSku].StockStatus);
+        Assert.Equal(attributeRozmiar, variantDetails.VariantDetails[variantSku].AttributeRozmiar);
+        Assert.Equal(price, variantDetails.VariantDetails[variantSku].Price);
+    }
+
+    private static VariantDetailsAssertion GetVariantDetails(
+        List<WpPostmetum>? wpMetas, WpPost? parentPost, List<WpPost>? variantPosts, Dictionary<ulong, string>? skus)
+    {
+        var variantDetails = new VariantDetailsAssertion();
 
         foreach (var sku in skus!.Where(x => x.Key != parentPost!.Id))
         {
@@ -323,13 +379,19 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
             var postTitle = variantPost!.PostTitle;
             var postName = variantPost!.PostName;
             var variantMeta = wpMetas?.Where(x => x.PostId == sku.Key).ToList();
-            var stock = int.Parse(variantMeta!.FirstOrDefault(x => x.MetaKey == "_stock")!.MetaValue);
-            var variantStockStatus = variantMeta!.FirstOrDefault(x => x.MetaKey == "_stock_status")!.MetaValue;
-            var attributeRozmiar = variantMeta!.FirstOrDefault(x => x.MetaKey == "attribute_pa_rozmiar")!.MetaValue;
-            var variantPrice = decimal.Parse(variantMeta!.FirstOrDefault(x => x.MetaKey == "_price")!.MetaValue);
-            variantDetails.Add(sku.Value, new(postTitle, postName, stock, variantStockStatus, attributeRozmiar, variantPrice));
+            var stock = int.Parse(variantMeta!.FirstOrDefault(x => x.MetaKey == MetaKeyConstans.Stock)!.MetaValue);
+            var variantStockStatus = variantMeta!.FirstOrDefault(x => x.MetaKey == MetaKeyConstans.StockStatus)!.MetaValue;
+            var attributeRozmiar = variantMeta!.FirstOrDefault(x => x.MetaKey == MetaKeyConstans.AttributePaRozmiar)!.MetaValue;
+            var variantPrice = decimal.Parse(variantMeta!.FirstOrDefault(x => x.MetaKey == MetaKeyConstans.Price)!.MetaValue);
+            variantDetails.VariantDetails.Add(sku.Value, new(postTitle, postName, stock, variantStockStatus, attributeRozmiar, variantPrice));
         }
 
         return variantDetails;
     }
+}
+
+internal record VariantDetailsAssertion
+{
+    public Dictionary<string, VariantDetailsParameters> VariantDetails { get; set; } = new Dictionary<string, VariantDetailsParameters>();
+    internal record VariantDetailsParameters(string PostTitle, string PostName, int Stock, string StockStatus, string AttributeRozmiar, decimal Price);
 }
