@@ -369,11 +369,11 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
                 expectedParentSku,
                 new List<MockDataHelper.FakeProductVariableValues>
                 {
-                    new MockDataHelper.FakeProductVariableValues("1008-XS/S", "xs-s", "38", Price: "199", RegularPrice: "199", SalesPrice: null, "instock"),
-                    new MockDataHelper.FakeProductVariableValues("1008-M/L", "m-l", "3", Price: "199", RegularPrice: "199", SalesPrice: null, "instock"),
-                    new MockDataHelper.FakeProductVariableValues("1008-XL/XXL", "xl-xxl", "11", Price: "199", RegularPrice: "199", SalesPrice: null, "instock"),
-                    new MockDataHelper.FakeProductVariableValues("1008-3XL/4XL", "3xl-4xl", "2", Price: "199" , RegularPrice: "199", SalesPrice: null, "instock"),
-                    new MockDataHelper.FakeProductVariableValues("1008-5XL/6XL", "5xl-6xl", "8", Price: "199", RegularPrice: "199", SalesPrice: null, "instock"),
+                    new MockDataHelper.FakeProductVariableValues("1008-XS/S", "xs-s", "12", Price: "199", RegularPrice: "123", SalesPrice: null, "instock"),
+                    new MockDataHelper.FakeProductVariableValues("1008-M/L", "m-l", "12", Price: "199", RegularPrice: "123", SalesPrice: null, "instock"),
+                    new MockDataHelper.FakeProductVariableValues("1008-XL/XXL", "xl-xxl", "12", Price: "199", RegularPrice: "123", SalesPrice: null, "instock"),
+                    new MockDataHelper.FakeProductVariableValues("1008-3XL/4XL", "3xl-4xl", "12", Price: "199" , RegularPrice: "123", SalesPrice: null, "instock"),
+                    new MockDataHelper.FakeProductVariableValues("1008-5XL/6XL", "5xl-6xl", "0", Price: "199", RegularPrice: "123", SalesPrice: null, "outofstock"),
                 }
             }
         };
