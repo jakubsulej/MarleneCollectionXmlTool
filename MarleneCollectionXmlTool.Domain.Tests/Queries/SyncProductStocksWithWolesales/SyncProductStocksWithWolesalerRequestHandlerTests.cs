@@ -302,7 +302,7 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
     }
 
     /// <summary>B53-CZARNY.xml</summary>
-    [Fact]
+    [Fact(Skip = "Obsolete logic for adding temp eans")]
     public async Task WholesalerHasProductWithoutVariantSkuField_MissingAllVariantsAreAddedWithVariantIdAsSku()
     {
         //Arrange
@@ -356,7 +356,7 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
     }
 
     /// <summary>D20-ZIELON-NoEan.xml</summary>
-    [Fact]
+    [Fact(Skip = "Obsolete logic for adding temp eans")]
     public async Task WholesalerHasProductWithoutVariantSkuField_AllVariantsAreSuccessfulyUpdatedUsingIdsAsEans()
     {
         //Arrange

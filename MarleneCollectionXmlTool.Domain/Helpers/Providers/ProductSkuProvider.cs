@@ -5,6 +5,7 @@ namespace MarleneCollectionXmlTool.Domain.Helpers.Providers;
 
 public static class ProductSkuProvider
 {
+    [Obsolete("Should not be used anymore")]
     public static string GetVariantProductSku(XmlNodeList variantChildNodes, string variantProductEan)
     {
         if (string.IsNullOrWhiteSpace(variantProductEan) == false) 
