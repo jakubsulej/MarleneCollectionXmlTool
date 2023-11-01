@@ -1,6 +1,7 @@
 ﻿using MarleneCollectionXmlTool.Domain.Queries;
 using MarleneCollectionXmlTool.Domain.Queries.CountTotalNumberOfUniqueItems;
 using MarleneCollectionXmlTool.Domain.Queries.GetAllProductConfigurations;
+using MarleneCollectionXmlTool.Domain.Queries.GetAllProductsWithoutSkus;
 using MarleneCollectionXmlTool.Domain.Queries.GetProductAttributes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -46,7 +47,18 @@ public class IvonXmlFileController : ControllerBase
     [HttpGet("GetAllProductConfigurations")]
     public async Task<IActionResult> GetAllProductConfigurations(CancellationToken cancellationToken)
     {
-        var response = await _mediator.Send(new GetAllProductConfigurationsRequest(), cancellationToken);;
+        var response = await _mediator.Send(new GetAllProductConfigurationsRequest(), cancellationToken);
+
+        if (response.IsFailed)
+            return BadRequest(response.Errors.First().Message);
+
+        return Ok(response.Value);
+    }
+
+    [HttpGet("GetAllProductsWithoutSkus")]
+    public async Task<IActionResult> GetAllProductsWithoutSkus(CancellationToken cancellationToken)
+    {
+        var response = await _mediator.Send(new GetAllProductsWithoutSkusRequest(), cancellationToken);
 
         if (response.IsFailed)
             return BadRequest(response.Errors.First().Message);
