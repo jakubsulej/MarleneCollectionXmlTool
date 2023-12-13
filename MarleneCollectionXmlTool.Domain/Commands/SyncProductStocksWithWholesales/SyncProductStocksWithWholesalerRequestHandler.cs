@@ -15,6 +15,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
     private readonly IProductStockStatusService _productStockStatusService;
     private readonly IProductPriceService _productPriceService;
     private readonly IProductCategoryService _productCategoryService;
+    private readonly IProductDeleteService _productDeleteService;
     private readonly WoocommerceDbContext _dbContext;
 
     public SyncProductStocksWithWholesalerRequestHandler(
@@ -23,6 +24,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         IProductStockStatusService productStockStatusService,
         IProductPriceService productPriceService,
         IProductCategoryService productCategoryService,
+        IProductDeleteService productDeleteService,
         WoocommerceDbContext dbContext)
     {
         _syncProductsWithWholesalerService = syncProductsWithWholesalerService;
@@ -30,6 +32,7 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
         _productStockStatusService = productStockStatusService;
         _productPriceService = productPriceService;
         _productCategoryService = productCategoryService;
+        _productDeleteService = productDeleteService;
         _dbContext = dbContext;
     }
 
@@ -71,6 +74,9 @@ public class SyncProductStocksWithWholesalerRequestHandler : IRequestHandler<Syn
 
             var updatedProductsOutOfStock = _productStockStatusService.UpdateProductsAndVariantsOutOfStock(
                 parentProducts, variantProducts, productMetaDetails, syncedPostIdsWithWholesaler);
+
+            var removedVariants = _productDeleteService.DeleteReduntantVariants(
+                variantProducts, productMetaDetails, syncedPostIdsWithWholesaler);
 
             var savedEntities = await _dbContext.SaveChangesAsync(cancellationToken);
 

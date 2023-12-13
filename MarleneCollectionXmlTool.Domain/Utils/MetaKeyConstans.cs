@@ -13,6 +13,7 @@ public struct MetaKeyConstans
     public const string Backorders = "_backorders";
     public const string SoldIndividually = "_sold_individually";
     public const string Virtual = "_virtual";
+    public const string Downloadable = "_downloadable";
     public const string DownloadLimit = "_download_limit";
     public const string DownloadExpiry = "_download_expiry";
     public const string WcAverageRating = "_wc_average_rating";
@@ -23,37 +24,40 @@ public struct MetaKeyConstans
     public const string Resync = "resync";
     public const string WooseaExcludeProduct = "_woosea_exclude_product";
     public const string VariantDescription = "_variation_description";
-    public const string Downloadable = "_downloadable";
     public const string AttributePaRozmiar = "attribute_pa_rozmiar";
+    public const string AttributeKolor = "attribute_kolor";
     public const string RegularPrice = "_regular_price";
     public const string SalePrice = "_sale_price";
     public const string ThumbnailId = "_thumbnail_id";
+    public const string UniqId = "uniqid";
+    public const string ImportUid = "import_uid";
+    public const string ImportStartedAt = "import_started_at";
 
     public static readonly string[] AcceptableMetaKeys =
     {
-        "_variation_description", 
-        "total_sales", 
-        "_tax_status", 
-        "_tax_class", 
-        "_manage_stock", 
-        "_backorders", 
-        "_sold_individually", 
-        "_virtual", 
-        "_downloadable",
-        "_download_limit", 
-        "_download_expiry", 
-        "_stock", 
-        "_stock_status", 
-        "_wc_average_rating", 
-        "_wc_review_count", 
-        "attribute_kolor", 
-        "attribute_rozmiar",
-        "uniqid", 
-        "_product_version", 
-        "import_uid", 
-        "import_started_at", 
-        "_sku", 
-        "_regular_price", 
-        "_price"
+        VariantDescription, 
+        TotalSales, 
+        TaxStatus, 
+        TaxClass, 
+        ManageStock, 
+        Backorders, 
+        SoldIndividually, 
+        Virtual, 
+        Downloadable,
+        DownloadLimit,
+        DownloadExpiry, 
+        Stock, 
+        StockStatus,
+        WcAverageRating,
+        WcReviewCount, 
+        AttributeKolor, 
+        AttributePaRozmiar,
+        UniqId,
+        ProductVersion,
+        ImportUid,
+        ImportStartedAt, 
+        Sku, 
+        RegularPrice, 
+        Price
     };
 }

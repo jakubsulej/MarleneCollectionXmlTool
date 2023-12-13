@@ -31,11 +31,20 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         var productPriceService = A.Fake<IProductPriceService>();
         var configurationArrayProvider = new ConfigurationArrayProvider(configuration);
         var syncProductWithWholesalerService = new SyncWoocommerceProductsWithWholesalerService(configuration, productAttributeHelper, configurationArrayProvider, _dbContext);
-        var productStockStatusService = new ProductStockStatusService(configurationArrayProvider);        
+        var productStockStatusService = new ProductStockStatusService(configurationArrayProvider);
+        var productDeleteService = new ProductDeleteService(_dbContext);
         var cacheProvider = A.Fake<ICacheProvider>();
         A.CallTo(() => cacheProvider.GetAllWpTerms()).Returns(new List<WpTerm> { new WpTerm { TermId = 1, Name = WpTermSlugConstans.Promocje, Slug = WpTermSlugConstans.Promocje } });
         var productCategoryService = new ProductCategoryService(cacheProvider, _dbContext);   
-        _sut = new SyncProductStocksWithWholesalerRequestHandler(syncProductWithWholesalerService, _wholesalerService, productStockStatusService, productPriceService, productCategoryService, _dbContext);
+        
+        _sut = new SyncProductStocksWithWholesalerRequestHandler(
+            syncProductWithWholesalerService, 
+            _wholesalerService, 
+            productStockStatusService, 
+            productPriceService, 
+            productCategoryService,
+            productDeleteService, 
+            _dbContext);
     }
 
     /// <summary>D20-ZIELON.xml</summary>
@@ -302,7 +311,7 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
     }
 
     /// <summary>B53-CZARNY.xml</summary>
-    [Fact(Skip = "Obsolete logic for adding temp eans")]
+    [Fact]
     public async Task WholesalerHasProductWithoutVariantSkuField_MissingAllVariantsAreAddedWithVariantIdAsSku()
     {
         //Arrange
@@ -356,8 +365,8 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
     }
 
     /// <summary>D20-ZIELON-NoEan.xml</summary>
-    [Fact(Skip = "Obsolete logic for adding temp eans")]
-    public async Task WholesalerHasProductWithoutVariantSkuField_AllVariantsAreSuccessfulyUpdatedUsingIdsAsEans()
+    [Fact]
+    public async Task WholesalerHasProductWithoutVariantSkuField_AllVariantsAreSuccessfulyUpdatedUsingIdsAsEans_GivenWholesalerProductWithNoEan()
     {
         //Arrange
         var expectedParentSku = "D20-ZIELON";
@@ -423,6 +432,78 @@ public class SyncProductStocksWithWolesalerRequestHandlerTests
         AssertVariantDetails("dummy post title", "dummy post name", 11, "instock", "xl-xxl", 199, "1008-XL/XXL", variantDetails);
         AssertVariantDetails("dummy post title", "dummy post name", 2, "instock", "3xl-4xl", 199, "1008-3XL/4XL", variantDetails);
         AssertVariantDetails("dummy post title", "dummy post name", 8, "instock", "5xl-6xl", 199, "1008-5XL/6XL", variantDetails);
+    }
+
+    /// <summary>D20-ZIELON.xml</summary>
+    [Fact]
+    public async Task 
+        WholesalerHasProductWithoutVariantSkuField_AllVariantsAreSuccessfulyUpdatedUsingIdsAsEans_GivenWholesalerProductWithExistingEan()
+    {
+        //Arrange
+        var expectedParentSku = "D20-ZIELON";
+        var cancellationToken = new CancellationToken();
+
+        var variantTree = new Dictionary<string, List<MockDataHelper.FakeProductVariableValues>>
+        {
+            {
+                expectedParentSku,
+                new List<MockDataHelper.FakeProductVariableValues>
+                {
+                    new MockDataHelper.FakeProductVariableValues("1008-XS/S", "xs-s", "12", Price: "199", RegularPrice: "123", SalesPrice: null, "instock"),
+                    new MockDataHelper.FakeProductVariableValues("1008-M/L", "m-l", "12", Price: "199", RegularPrice: "123", SalesPrice: null, "instock"),
+                    new MockDataHelper.FakeProductVariableValues("1008-XL/XXL", "xl-xxl", "12", Price: "199", RegularPrice: "123", SalesPrice: null, "instock"),
+                    new MockDataHelper.FakeProductVariableValues("1008-3XL/4XL", "3xl-4xl", "12", Price: "199" , RegularPrice: "123", SalesPrice: null, "instock"),
+                    new MockDataHelper.FakeProductVariableValues("1008-5XL/6XL", "5xl-6xl", "0", Price: "199", RegularPrice: "123", SalesPrice: null, "outofstock"),
+                }
+            }
+        };
+
+        var originalWpPostsWithMetas = MockDataHelper.GetFakeProductWithVariations(variantTree);
+        var originalWpPosts = originalWpPostsWithMetas.Select(x => x.WpPost).ToList();
+        var originalWpMetas = originalWpPostsWithMetas.SelectMany(x => x.WpPostmetum).ToList();
+        _dbContext.SeedRange(originalWpPosts);
+        _dbContext.SeedRange(originalWpMetas);
+
+        var xmlDocument = XmlTestHelper.GetXmlDocumentFromStaticFile("D20-ZIELON");
+        A.CallTo(() => _wholesalerService.GetXmlDocumentNestedVariantsXmlUrl(A<CancellationToken>._)).Returns(xmlDocument);
+
+        //Act
+        var response = await _sut.Handle(new SyncProductStocksWithWholesalerRequest(), cancellationToken);
+
+        //Assert
+        var wpPosts = await _dbContext.WpPosts.ToListAsync();
+        var wpMetas = await _dbContext.WpPostmeta.ToListAsync();
+        var parentPostId = wpMetas.Where(x => x.MetaKey == MetaKeyConstans.Sku).Where(x => x.MetaValue == expectedParentSku).First().PostId;
+        var parentPost = wpPosts.Where(x => x.PostType == "product").Where(x => x.Id == parentPostId).First();
+
+        var variantPosts = wpPosts?
+            .Where(x => x.PostParent == parentPost?.Id)?
+            .ToList();
+
+        var skus = wpMetas?
+            .Where(x => x.MetaKey == MetaKeyConstans.Sku)?
+            .Select(x => new { x.PostId, x.MetaValue })?
+            .Where(x => !string.IsNullOrEmpty(x.MetaValue))?
+            .Where(x => variantPosts!.Select(y => y.Id).Contains(x.PostId))
+            .ToDictionary(x => x.PostId, x => x.MetaValue);
+
+        var parentStockStatus = wpMetas?
+            .Where(x => x.PostId == parentPost?.Id)?
+            .Where(x => x.MetaKey == MetaKeyConstans.StockStatus)
+            .Where(x => !string.IsNullOrEmpty(x.MetaValue))
+            .FirstOrDefault()?
+            .MetaValue;
+
+        Assert.True(response.IsSuccess);
+        Assert.Equal("instock", parentStockStatus);
+        Assert.Equal(variantTree.Values.Sum(x => x.Count), variantPosts!.Count);
+
+        var variantDetails = GetVariantDetails(wpMetas, parentPost, variantPosts, skus);
+        AssertVariantDetails("dummy post title - XS/S", "dummy-post-title-xs-s", 38, "instock", "xs-s", 123, "5908214227099", variantDetails);
+        AssertVariantDetails("dummy post title - M/L", "dummy-post-title-m-l", 3, "instock", "m-l", 123, "5908214227082", variantDetails);
+        AssertVariantDetails("dummy post title - XL/XXL", "dummy-post-title-xl-xxl", 11, "instock", "xl-xxl", 123, "5908214231799", variantDetails);
+        AssertVariantDetails("dummy post title - 3XL/4XL", "dummy-post-title-3xl-4xl", 2, "instock", "3xl-4xl", 123, "590821423180", variantDetails);
+        AssertVariantDetails("dummy post title - 5XL/6XL", "dummy-post-title-5xl-6xl", 8, "instock", "5xl-6xl", 123, "5908214231812", variantDetails);
     }
 
     private static void AssertVariantDetails(

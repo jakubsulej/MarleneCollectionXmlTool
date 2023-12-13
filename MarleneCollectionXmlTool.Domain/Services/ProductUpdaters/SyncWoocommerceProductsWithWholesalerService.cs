@@ -79,7 +79,7 @@ public class SyncWoocommerceProductsWithWholesalerService : ISyncWoocommerceProd
 
                 foreach (XmlNode child in variant.ChildNodes)
                 {
-                    if (child.Name == HurtIvonXmlConstans.Ean) variantProductWpPostDto.Sku = child.InnerText.Trim();
+                    if (child.Name == HurtIvonXmlConstans.Ean) variantProductWpPostDto.Sku = ProductSkuProvider.GetVariantProductSku(variant.ChildNodes, child.InnerText);
                     if (child.Name == HurtIvonXmlConstans.Rozmiar) variantProductWpPostDto.AttributeRozmiar = child.InnerText.Trim();
                     if (child.Name == HurtIvonXmlConstans.DostepnaIlosc) variantProductWpPostDto.Stock = child.InnerText.Trim();
                 }
