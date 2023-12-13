@@ -44,6 +44,9 @@ public class ProductDeleteService : IProductDeleteService
         foreach (var variant in missingVariantsInCatalog)
         {
             syncedProductWithWholesaler.TryGetValue(variant.PostParent, out var synchedVariantIdsForCurrentParent);
+            if (synchedVariantIdsForCurrentParent == null)
+                continue;
+
             var synchedMetaDetails = synchedProductSizeMetaDetails
                 .Where(x => synchedVariantIdsForCurrentParent.Contains(x.PostId))
                 .Select(x => x.MetaValue)

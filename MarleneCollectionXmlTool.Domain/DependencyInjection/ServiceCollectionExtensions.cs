@@ -66,6 +66,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISyncWoocommerceProductsWithWholesalerService, SyncWoocommerceProductsWithWholesalerService>();
         services.AddScoped<IProductStockStatusService, ProductStockStatusService>();
         services.AddScoped<IProductCategoryService, ProductCategoryService>();
+        services.AddScoped<IProductDeleteService, ProductDeleteService>();
 
         //Cache services
         services.AddScoped<ICacheProvider, CacheProvider>();
