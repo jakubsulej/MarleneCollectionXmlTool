@@ -11,4 +11,6 @@ public struct ConfigurationKeyConstans
     public const string DB_USER = "DB_USER";
     public const string DB_PASSWORD = "DB_PASSWORD";
     public const string DB_NAME = "DB_NAME";
+    public const string PriceMarginFactor = "PriceMarginFactor";
+    public const string PriceMarginStatic = "PriceMarginStatic";
 }

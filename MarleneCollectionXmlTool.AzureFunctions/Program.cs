@@ -30,6 +30,8 @@ public class Program
                 SetEnvironmentVariable(configuration, "BaseUrl");
                 SetEnvironmentVariable(configuration, "WoocommerceXmlUrl");
                 SetEnvironmentVariable(configuration, "NestedVariantsXmlUrl");
+                SetEnvironmentVariable(configuration, "PriceMarginFactor");
+                SetEnvironmentVariable(configuration, "PriceMarginStatic");
             }
 
             services.AddDomainServices();

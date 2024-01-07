@@ -16,10 +16,10 @@
   "DB_PORT": 0,
   "WoocommerceConsumerKey": "<secret>",
   "WoocommerceConsumerSecret": "<secret>",
-  "DestinationFolder": "<secret>",
-  "SshHostFingerpring": "<secret>",
   "NotUpdatableSkus:0": "<sku0>",
   "NotUpdatableSkus:1": "<sku1>",
   "CategoriesToSkip:0": "<category0>",
-  "CategoriesToSkip:1": "<category1>"
+  "CategoriesToSkip:1": "<category1>",
+  "PriceMarginFactor": 1,
+  "PriceMarginStatic": 0
 }

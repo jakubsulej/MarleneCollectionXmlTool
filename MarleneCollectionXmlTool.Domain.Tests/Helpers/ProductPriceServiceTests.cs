@@ -20,7 +20,7 @@ public class ProductPromoPriceProviderTests
         var promoPrice = 24.5m;
         var currentPrice = 49m;
         var currentPromoPrice = (decimal?)null;
-        var expectedResult = (catalogPrice, promoPrice);
+        var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
         var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
@@ -37,7 +37,7 @@ public class ProductPromoPriceProviderTests
         var promoPrice = 24.5m;
         var currentPrice = 39m;
         var currentPromoPrice = (decimal?)null;
-        var expectedResult = (catalogPrice, promoPrice);
+        var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
         var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
@@ -54,7 +54,7 @@ public class ProductPromoPriceProviderTests
         var promoPrice = (decimal?)null;
         var currentPrice = 49m;
         var currentPromoPrice = (decimal?)null;
-        var expectedResult = (catalogPrice, promoPrice);
+        var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
         var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
@@ -71,7 +71,7 @@ public class ProductPromoPriceProviderTests
         var promoPrice = (decimal?)null;
         var currentPrice = 49m;
         var currentPromoPrice = 24.5m;
-        var expectedResult = (catalogPrice, promoPrice);
+        var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
         var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
@@ -88,7 +88,7 @@ public class ProductPromoPriceProviderTests
         var promoPrice = (decimal?)null;
         var currentPrice = 39m;
         var currentPromoPrice = (decimal?)null;
-        var expectedResult = (catalogPrice, promoPrice);
+        var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
         var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
@@ -105,7 +105,7 @@ public class ProductPromoPriceProviderTests
         var promoPrice = 30m;
         var currentPrice = 49m;
         var currentPromoPrice = 24.5m;
-        var expectedResult = (catalogPrice, promoPrice);
+        var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
         var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
@@ -122,7 +122,7 @@ public class ProductPromoPriceProviderTests
         var promoPrice = 24.5m;
         var currentPrice = 49m;
         var currentPromoPrice = 30m;
-        var expectedResult = (catalogPrice, promoPrice);
+        var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
         var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
