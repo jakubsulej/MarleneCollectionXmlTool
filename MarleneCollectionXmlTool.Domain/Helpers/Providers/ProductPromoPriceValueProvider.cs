@@ -1,4 +1,6 @@
-﻿namespace MarleneCollectionXmlTool.Domain.Helpers.Providers;
+﻿using MarleneCollectionXmlTool.Domain.Utils;
+
+namespace MarleneCollectionXmlTool.Domain.Helpers.Providers;
 
 public interface IProductPromoPriceValueProvider
 {
@@ -14,8 +16,8 @@ public class ProductPromoPriceValueProvider : IProductPromoPriceValueProvider
 
     public ProductPromoPriceValueProvider()
     {
-        _priceMarginFactor = 1.0m;
-        _priceMarginStatic = 0m;
+        _priceMarginFactor = EnvironmentVariableHelpers.GetEnvironmentVariableOrDefault<decimal>(ConfigurationKeyConstans.PriceMarginFactor, 1);
+        _priceMarginStatic = EnvironmentVariableHelpers.GetEnvironmentVariableOrDefault<decimal>(ConfigurationKeyConstans.PriceMarginStatic, 0);
     }
 
     public ProductPriceDto GetNewProductPrice(
