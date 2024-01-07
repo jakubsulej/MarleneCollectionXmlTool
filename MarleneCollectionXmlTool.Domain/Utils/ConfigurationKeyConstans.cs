@@ -5,6 +5,7 @@ public struct ConfigurationKeyConstans
     public const string WoocommerceXmlUrl = "WoocommerceXmlUrl";
     public const string NestedVariantsXmlUrl = "NestedVariantsXmlUrl";
     public const string BaseClientUrl = "BaseClientUrl";
+    public const string BaseUrl = "BaseUrl";
     public const string HurtIvonBaseUrl = "HurtIvonBaseUrl";
     public const string DB_HOST = "DB_HOST";
     public const string DB_PORT = "DB_PORT";

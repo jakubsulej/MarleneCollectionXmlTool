@@ -1,4 +1,5 @@
 ﻿using MarleneCollectionXmlTool.Domain.DependencyInjection;
+using MarleneCollectionXmlTool.Domain.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -21,17 +22,17 @@ public class Program
             {
                 var configuration = new ConfigurationBuilder().Build();
                 configuration = GetAzureFunctionConfiguration("local.settings.json");
-                SetEnvironmentVariable(configuration, "DB_NAME");
-                SetEnvironmentVariable(configuration, "DB_USER");
-                SetEnvironmentVariable(configuration, "DB_PASSWORD");
-                SetEnvironmentVariable(configuration, "DB_HOST");
-                SetEnvironmentVariable(configuration, "DB_PORT");
-                SetEnvironmentVariable(configuration, "BaseClientUrl");
-                SetEnvironmentVariable(configuration, "BaseUrl");
-                SetEnvironmentVariable(configuration, "WoocommerceXmlUrl");
-                SetEnvironmentVariable(configuration, "NestedVariantsXmlUrl");
-                SetEnvironmentVariable(configuration, "PriceMarginFactor");
-                SetEnvironmentVariable(configuration, "PriceMarginStatic");
+                SetEnvironmentVariable(configuration, ConfigurationKeyConstans.DB_NAME);
+                SetEnvironmentVariable(configuration, ConfigurationKeyConstans.DB_USER);
+                SetEnvironmentVariable(configuration, ConfigurationKeyConstans.DB_PASSWORD);
+                SetEnvironmentVariable(configuration, ConfigurationKeyConstans.DB_HOST);
+                SetEnvironmentVariable(configuration, ConfigurationKeyConstans.DB_PORT);
+                SetEnvironmentVariable(configuration, ConfigurationKeyConstans.BaseClientUrl);
+                SetEnvironmentVariable(configuration, ConfigurationKeyConstans.BaseUrl);
+                SetEnvironmentVariable(configuration, ConfigurationKeyConstans.WoocommerceXmlUrl);
+                SetEnvironmentVariable(configuration, ConfigurationKeyConstans.NestedVariantsXmlUrl);
+                SetEnvironmentVariable(configuration, ConfigurationKeyConstans.PriceMarginFactor);
+                SetEnvironmentVariable(configuration, ConfigurationKeyConstans.PriceMarginStatic);
             }
 
             services.AddDomainServices();
