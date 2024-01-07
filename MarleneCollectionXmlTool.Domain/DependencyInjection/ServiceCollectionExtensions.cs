@@ -43,7 +43,7 @@ public static class ServiceCollectionExtensions
 
         var baseUrl = Environment.GetEnvironmentVariable(ConfigurationKeyConstans.HurtIvonBaseUrl);
         services.AddScoped<IGetXmlDocumentFromWholesalerService>(sp => new GetXmlDocumentFromWholesalerService(new Uri(baseUrl)));
-        
+
         services.AddCommonServices();
 
         return services;

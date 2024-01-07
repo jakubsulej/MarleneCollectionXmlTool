@@ -1,17 +1,11 @@
 ﻿using MarleneCollectionXmlTool.Domain.Helpers.Providers;
+using MarleneCollectionXmlTool.Domain.Utils;
 using Xunit;
 
 namespace MarleneCollectionXmlTool.Domain.Tests.Helpers;
 
 public class ProductPromoPriceProviderTests
 {
-    private readonly IProductPromoPriceValueProvider _sut;
-
-    public ProductPromoPriceProviderTests()
-    {
-        _sut = new ProductPromoPriceValueProvider();
-    }
-
     [Fact]
     public void CurrentProductIsNotOnSale_AddNewPromoPrice()
     {
@@ -23,7 +17,7 @@ public class ProductPromoPriceProviderTests
         var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
-        var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
+        var result = new ProductPromoPriceValueProvider().GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
 
         //Assert
         Assert.Equal(expectedResult, result);
@@ -40,7 +34,7 @@ public class ProductPromoPriceProviderTests
         var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
-        var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
+        var result = new ProductPromoPriceValueProvider().GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
 
         //Assert
         Assert.Equal(expectedResult, result);
@@ -57,7 +51,7 @@ public class ProductPromoPriceProviderTests
         var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
-        var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
+        var result = new ProductPromoPriceValueProvider().GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
 
         //Assert
         Assert.Equal(expectedResult, result);
@@ -74,7 +68,7 @@ public class ProductPromoPriceProviderTests
         var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
-        var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
+        var result = new ProductPromoPriceValueProvider().GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
 
         //Assert
         Assert.Equal(expectedResult, result);
@@ -91,7 +85,7 @@ public class ProductPromoPriceProviderTests
         var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
-        var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
+        var result = new ProductPromoPriceValueProvider().GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
 
         //Assert
         Assert.Equal(expectedResult, result);
@@ -108,7 +102,7 @@ public class ProductPromoPriceProviderTests
         var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
-        var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
+        var result = new ProductPromoPriceValueProvider().GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
 
         //Assert
         Assert.Equal(expectedResult, result);
@@ -125,9 +119,37 @@ public class ProductPromoPriceProviderTests
         var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
 
         //Act
-        var result = _sut.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
+        var result = new ProductPromoPriceValueProvider().GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
 
         //Assert
         Assert.Equal(expectedResult, result);
+    }
+
+    [Theory]
+    [InlineData(1, 0)]
+    [InlineData(1.2, 14)]
+    [InlineData(1, 22)]
+    public void GetNewProductPrice_ShouldAddStaticMarginToCurrentPrice(decimal factorMargin, decimal staticMargin)
+    {
+        //Arrange
+        var catalogPrice = 49m;
+        var promoPrice = 24.5m;
+        var currentPrice = 49m;
+        var currentPromoPrice = 30m;
+
+        var expectedCatalogPrice = (catalogPrice * factorMargin) + staticMargin;
+        var expectedPromoPrice = (promoPrice * factorMargin) + staticMargin;
+        var expectedResult = new ProductPriceDto(expectedCatalogPrice, expectedPromoPrice);
+
+        Environment.SetEnvironmentVariable(ConfigurationKeyConstans.PriceMarginFactor, factorMargin.ToString());
+        Environment.SetEnvironmentVariable(ConfigurationKeyConstans.PriceMarginStatic, staticMargin.ToString());
+
+        //Act
+        var result = new ProductPromoPriceValueProvider().GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
+
+        //Assert
+        Assert.Equal(expectedResult, result);
+        Environment.SetEnvironmentVariable(ConfigurationKeyConstans.PriceMarginFactor, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeyConstans.PriceMarginStatic, null);
     }
 }

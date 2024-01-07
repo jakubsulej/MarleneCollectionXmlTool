@@ -16,8 +16,8 @@ public class ProductPromoPriceValueProvider : IProductPromoPriceValueProvider
 
     public ProductPromoPriceValueProvider()
     {
-        _priceMarginFactor = EnvironmentVariableHelpers.GetEnvironmentVariableOrDefault<decimal>(ConfigurationKeyConstans.PriceMarginFactor, 1);
-        _priceMarginStatic = EnvironmentVariableHelpers.GetEnvironmentVariableOrDefault<decimal>(ConfigurationKeyConstans.PriceMarginStatic, 0);
+        _priceMarginFactor = EnvironmentVariableValueProvider.GetEnvironmentVariableOrDefault<decimal>(ConfigurationKeyConstans.PriceMarginFactor, 1);
+        _priceMarginStatic = EnvironmentVariableValueProvider.GetEnvironmentVariableOrDefault<decimal>(ConfigurationKeyConstans.PriceMarginStatic, 0);
     }
 
     public ProductPriceDto GetNewProductPrice(

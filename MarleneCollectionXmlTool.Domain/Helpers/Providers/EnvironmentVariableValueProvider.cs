@@ -1,6 +1,6 @@
-﻿namespace MarleneCollectionXmlTool.Domain.Helpers;
+﻿namespace MarleneCollectionXmlTool.Domain.Helpers.Providers;
 
-public static class EnvironmentVariableHelpers
+public static class EnvironmentVariableValueProvider
 {
     public static T GetEnvironmentVariableOrDefault<T>(string variableName, T defaultValue = default)
     {

@@ -1,6 +1,5 @@
 ﻿using FakeItEasy;
 using MarleneCollectionXmlTool.DBAccessLayer;
-using MarleneCollectionXmlTool.DBAccessLayer.Cache;
 using MarleneCollectionXmlTool.Domain.Helpers.Providers;
 using MarleneCollectionXmlTool.Domain.Services.ProductUpdaters;
 using MarleneCollectionXmlTool.Domain.Tests.Utils;

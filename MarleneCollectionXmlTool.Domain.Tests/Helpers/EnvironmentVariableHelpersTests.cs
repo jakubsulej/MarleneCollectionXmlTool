@@ -1,4 +1,5 @@
 ﻿using MarleneCollectionXmlTool.Domain.Helpers;
+using MarleneCollectionXmlTool.Domain.Helpers.Providers;
 using Xunit;
 
 namespace MarleneCollectionXmlTool.Domain.Tests.Helpers;
@@ -15,7 +16,7 @@ public class EnvironmentVariableHelpersTests
         Environment.SetEnvironmentVariable(environementName, value.ToString());
 
         //Act
-        var result = EnvironmentVariableHelpers.GetEnvironmentVariableOrDefault<decimal>(environementName);
+        var result = EnvironmentVariableValueProvider.GetEnvironmentVariableOrDefault<decimal>(environementName);
 
         //Assert
         Assert.Equal(value, result);
@@ -31,7 +32,7 @@ public class EnvironmentVariableHelpersTests
         Environment.SetEnvironmentVariable(environementName, value.ToString());
 
         //Act
-        var result = EnvironmentVariableHelpers.GetEnvironmentVariableOrDefault<bool>(environementName);
+        var result = EnvironmentVariableValueProvider.GetEnvironmentVariableOrDefault<bool>(environementName);
 
         //Assert
         Assert.Equal(value, result);
