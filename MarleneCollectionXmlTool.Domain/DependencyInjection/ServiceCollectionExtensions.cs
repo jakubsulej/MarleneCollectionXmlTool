@@ -19,19 +19,23 @@ public static class ServiceCollectionExtensions
     {
         var connectionString = configuration.GetMySqlConnectionString();
 
-        services.AddDbContext<WoocommerceDbContext>(options =>
-        {
-            options.UseMySQL(connectionString);
-        });
-
-        var baseUrl = configuration.GetValue<string>(ConfigurationKeyConstans.HurtIvonBaseUrl);
-        services.AddScoped<IGetXmlDocumentFromWholesalerService>(sp => new GetXmlDocumentFromWholesalerService(new Uri(baseUrl), configuration));
-
-        var priceMarginFactor = configuration.GetValue<decimal>(ConfigurationKeyConstans.PriceMarginFactor, 1);
-        var priceMarginStatic = configuration.GetValue<decimal>(ConfigurationKeyConstans.PriceMarginStatic, 0);
-        services.AddSingleton<IProductPromoPriceValueProvider>(sp => new ProductPromoPriceValueProvider(priceMarginFactor, priceMarginStatic));
-
-        services.AddCommonServices();
+        services
+            .AddDbContext<WoocommerceDbContext>(options =>
+            {
+                options.UseMySQL(connectionString);
+            })
+            .AddScoped<IGetXmlDocumentFromWholesalerService>(sp => 
+            {
+                var baseUrl = configuration.GetValue<string>(ConfigurationKeyConstans.HurtIvonBaseUrl);
+                return new GetXmlDocumentFromWholesalerService(new Uri(baseUrl), configuration); 
+            })
+            .AddSingleton<IProductPromoPriceValueProvider>(sp => 
+            {
+                var priceMarginFactor = configuration.GetValue<decimal>(ConfigurationKeyConstans.PriceMarginFactor, 1);
+                var priceMarginStatic = configuration.GetValue<decimal>(ConfigurationKeyConstans.PriceMarginStatic, 0);
+                return new ProductPromoPriceValueProvider(priceMarginFactor, priceMarginStatic); 
+            })
+            .AddCommonServices();
 
         return services;
     }
@@ -40,19 +44,23 @@ public static class ServiceCollectionExtensions
     {
         var connectionString = GetMySqlConnectionStringFromEnvironment();
 
-        services.AddDbContext<WoocommerceDbContext>(options =>
-        {
-            options.UseMySQL(connectionString);
-        });
-
-        var baseUrl = Environment.GetEnvironmentVariable(ConfigurationKeyConstans.HurtIvonBaseUrl);
-        services.AddScoped<IGetXmlDocumentFromWholesalerService>(sp => new GetXmlDocumentFromWholesalerService(new Uri(baseUrl)));
-
-        var priceMarginFactor = EnvironmentVariableValueProvider.GetEnvironmentVariableOrDefault(ConfigurationKeyConstans.PriceMarginFactor, 1);
-        var priceMarginStatic = EnvironmentVariableValueProvider.GetEnvironmentVariableOrDefault(ConfigurationKeyConstans.PriceMarginStatic, 0);
-        services.AddSingleton<IProductPromoPriceValueProvider>(sp => new ProductPromoPriceValueProvider(priceMarginFactor, priceMarginStatic));
-
-        services.AddCommonServices();
+        services
+            .AddDbContext<WoocommerceDbContext>(options =>
+            {
+                options.UseMySQL(connectionString);
+            })
+            .AddScoped<IGetXmlDocumentFromWholesalerService>(sp =>
+            {
+                var baseUrl = Environment.GetEnvironmentVariable(ConfigurationKeyConstans.HurtIvonBaseUrl);
+                return new GetXmlDocumentFromWholesalerService(new Uri(baseUrl));
+            })
+            .AddSingleton<IProductPromoPriceValueProvider>(sp =>
+            {
+                var priceMarginFactor = EnvironmentVariableValueProvider.GetEnvironmentVariableOrDefault(ConfigurationKeyConstans.PriceMarginFactor, 1);
+                var priceMarginStatic = EnvironmentVariableValueProvider.GetEnvironmentVariableOrDefault(ConfigurationKeyConstans.PriceMarginStatic, 0);
+                return new ProductPromoPriceValueProvider(priceMarginFactor, priceMarginStatic);
+            })
+            .AddCommonServices();
 
         return services;
     }
