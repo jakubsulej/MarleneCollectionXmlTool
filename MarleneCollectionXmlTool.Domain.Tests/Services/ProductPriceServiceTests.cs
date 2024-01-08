@@ -39,7 +39,7 @@ public class ProductPriceServiceTests
         await _dbContext.AddRangeAsync(metaLookups);
         await _dbContext.SaveChangesAsync();
 
-        var productPriceService = new ProductPriceService(_dbContext, new ProductPromoPriceValueProvider(), A.Fake<IProductCategoryService>());
+        var productPriceService = new ProductPriceService(_dbContext, new ProductPromoPriceValueProvider(1, 0), A.Fake<IProductCategoryService>());
 
         //Act
         var result = await productPriceService.UpdateProductPrices(parentProducts, variantProducts, productMetaDetails, xmlProducts);
@@ -99,7 +99,7 @@ public class ProductPriceServiceTests
         await _dbContext.AddRangeAsync(metaLookups);
         await _dbContext.SaveChangesAsync();
 
-        var productPriceService = new ProductPriceService(_dbContext, new ProductPromoPriceValueProvider(), A.Fake<IProductCategoryService>());
+        var productPriceService = new ProductPriceService(_dbContext, new ProductPromoPriceValueProvider(1, 0), A.Fake<IProductCategoryService>());
 
         //Act
         var result = await productPriceService.UpdateProductPrices(parentProducts, variantProducts, productMetaDetails, xmlProducts);
@@ -165,10 +165,7 @@ public class ProductPriceServiceTests
         await _dbContext.AddRangeAsync(metaLookups);
         await _dbContext.SaveChangesAsync();
 
-        Environment.SetEnvironmentVariable(ConfigurationKeyConstans.PriceMarginFactor, factorMargin.ToString());
-        Environment.SetEnvironmentVariable(ConfigurationKeyConstans.PriceMarginStatic, staticMargin.ToString());
-
-        var productPriceService = new ProductPriceService(_dbContext, new ProductPromoPriceValueProvider(), A.Fake<IProductCategoryService>());
+        var productPriceService = new ProductPriceService(_dbContext, new ProductPromoPriceValueProvider(factorMargin, staticMargin), A.Fake<IProductCategoryService>());
 
         //Act
         var result = await productPriceService.UpdateProductPrices(parentProducts, variantProducts, productMetaDetails, xmlProducts);
@@ -210,9 +207,6 @@ public class ProductPriceServiceTests
 
         Assert.True(minPriceLookup.All(x => x.Value == currentPriceDecimal));
         Assert.True(maxPriceLookup.All(x => x.Value == regularPriceValue));
-
-        Environment.SetEnvironmentVariable(ConfigurationKeyConstans.PriceMarginFactor, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeyConstans.PriceMarginStatic, null);
     }
 
     private static List<MockDataHelper.WpPostWithMeta> CreateMockDatabaseObjects(string price, string regularPrice, string salesPrice)

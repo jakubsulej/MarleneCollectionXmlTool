@@ -27,6 +27,10 @@ public static class ServiceCollectionExtensions
         var baseUrl = configuration.GetValue<string>(ConfigurationKeyConstans.HurtIvonBaseUrl);
         services.AddScoped<IGetXmlDocumentFromWholesalerService>(sp => new GetXmlDocumentFromWholesalerService(new Uri(baseUrl), configuration));
 
+        var priceMarginFactor = configuration.GetValue<decimal>(ConfigurationKeyConstans.PriceMarginFactor, 1);
+        var priceMarginStatic = configuration.GetValue<decimal>(ConfigurationKeyConstans.PriceMarginStatic, 0);
+        services.AddSingleton<IProductPromoPriceValueProvider>(sp => new ProductPromoPriceValueProvider(priceMarginFactor, priceMarginStatic));
+
         services.AddCommonServices();
 
         return services;
@@ -44,6 +48,10 @@ public static class ServiceCollectionExtensions
         var baseUrl = Environment.GetEnvironmentVariable(ConfigurationKeyConstans.HurtIvonBaseUrl);
         services.AddScoped<IGetXmlDocumentFromWholesalerService>(sp => new GetXmlDocumentFromWholesalerService(new Uri(baseUrl)));
 
+        var priceMarginFactor = EnvironmentVariableValueProvider.GetEnvironmentVariableOrDefault(ConfigurationKeyConstans.PriceMarginFactor, 1);
+        var priceMarginStatic = EnvironmentVariableValueProvider.GetEnvironmentVariableOrDefault(ConfigurationKeyConstans.PriceMarginStatic, 0);
+        services.AddSingleton<IProductPromoPriceValueProvider>(sp => new ProductPromoPriceValueProvider(priceMarginFactor, priceMarginStatic));
+
         services.AddCommonServices();
 
         return services;
@@ -57,7 +65,6 @@ public static class ServiceCollectionExtensions
 
         //Business services
         services.AddSingleton<IConfigurationArrayProvider, ConfigurationArrayProvider>();
-        services.AddSingleton<IProductPromoPriceValueProvider, ProductPromoPriceValueProvider>();
         services.AddScoped<IProductAttributeService, ProductAttributeService>();
         services.AddScoped<IImageService, ImageService>();
         services.AddScoped<IWoocommerceRestApiService, WoocommerceRestApiService>();

@@ -14,10 +14,10 @@ public class ProductPromoPriceValueProvider : IProductPromoPriceValueProvider
     private readonly decimal _priceMarginFactor;
     private readonly decimal _priceMarginStatic;
 
-    public ProductPromoPriceValueProvider()
+    public ProductPromoPriceValueProvider(decimal priceMarginFactor, decimal priceMarginStatic)
     {
-        _priceMarginFactor = EnvironmentVariableValueProvider.GetEnvironmentVariableOrDefault<decimal>(ConfigurationKeyConstans.PriceMarginFactor, 1);
-        _priceMarginStatic = EnvironmentVariableValueProvider.GetEnvironmentVariableOrDefault<decimal>(ConfigurationKeyConstans.PriceMarginStatic, 0);
+        _priceMarginFactor = priceMarginFactor;
+        _priceMarginStatic = priceMarginStatic;
     }
 
     public ProductPriceDto GetNewProductPrice(
