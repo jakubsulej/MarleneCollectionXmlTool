@@ -125,6 +125,23 @@ public class ProductPromoPriceProviderTests
         Assert.Equal(expectedResult, result);
     }
 
+    [Fact]
+    public void CurrentProductPriceIsHigherThanInCatalog_DecreaseOnlyProductPrice()
+    {
+        //Arrange
+        var catalogPrice = 199m;
+        var promoPrice = (decimal?)null;
+        var currentPrice = 350m;
+        var currentPromoPrice = (decimal?)null;
+        var expectedResult = new ProductPriceDto(catalogPrice, promoPrice);
+
+        //Act
+        var result = new ProductPromoPriceValueProvider(1, 0).GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
+
+        //Assert
+        Assert.Equal(expectedResult, result);
+    }
+
     [Theory]
     [InlineData(1, 0)]
     [InlineData(1.2, 14)]
