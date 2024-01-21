@@ -43,14 +43,14 @@ public class ProductPriceService : IProductPriceService
         foreach (XmlNode xmlProduct in xmlProducts)
         {
             var sku = string.Empty;
-            var catalogPrice = 0m;
-            var promoPrice = (decimal?)null;
+            var catalogRegularPrice = 0m;
+            var catalogPromoPrice = (decimal?)null;
 
             foreach (XmlNode child in xmlProduct.ChildNodes)
             {
                 if (child.Name == HurtIvonXmlConstans.KodKatalogowy) sku = child.InnerText.Trim();
-                else if (child.Name == HurtIvonXmlConstans.CenaKatalogowa) catalogPrice = decimal.Parse(child.InnerText.Trim());
-                else if (child.Name == HurtIvonXmlConstans.CenaPromo) promoPrice = decimal.Parse(child.InnerText.Trim());
+                else if (child.Name == HurtIvonXmlConstans.CenaKatalogowa) catalogRegularPrice = decimal.Parse(child.InnerText.Trim());
+                else if (child.Name == HurtIvonXmlConstans.CenaPromo) catalogPromoPrice = decimal.Parse(child.InnerText.Trim());
             }
 
             var parentMetaLookup = metaLookups.FirstOrDefault(x => x.Sku == sku);
@@ -65,9 +65,9 @@ public class ProductPriceService : IProductPriceService
 
             _ = decimal.TryParse(parentPriceMeta?.MetaValue, out var currentParentPrice);
 
-            if (parentPriceMeta != null) parentPriceMeta.MetaValue = catalogPrice.ToString();
-            parentMetaLookup.MaxPrice = catalogPrice;
-            parentMetaLookup.MinPrice = promoPrice ?? catalogPrice;
+            if (parentPriceMeta != null) parentPriceMeta.MetaValue = catalogRegularPrice.ToString();
+            parentMetaLookup.MaxPrice = catalogRegularPrice;
+            parentMetaLookup.MinPrice = catalogPromoPrice ?? catalogRegularPrice;
 
             var variantProducts = allVariantProducts.Where(x => x.PostParent == (ulong)productId).ToList();
 
@@ -90,11 +90,11 @@ public class ProductPriceService : IProductPriceService
 
                 var variantMetaLookup = metaLookups.FirstOrDefault(x => x.ProductId == (long)variantProduct.Id);
 
-                _ = decimal.TryParse(regularPriceMeta.MetaValue, out var currentPrice);
+                _ = decimal.TryParse(regularPriceMeta.MetaValue, out var currentRegularPrice);
                 decimal? currentPromoPrice = decimal.TryParse(salesPriceMeta?.MetaValue, out var tempVal1) ? tempVal1 : null;
 
                 var (newRegularPrice, newPromoPrice) =
-                    _priceValueProvider.GetNewProductPrice(catalogPrice, promoPrice, currentPrice, currentPromoPrice);
+                    _priceValueProvider.GetNewProductPrice(catalogRegularPrice, catalogPromoPrice, currentRegularPrice, currentPromoPrice);
 
                 priceMeta.MetaValue = newPromoPrice != null ? newPromoPrice.ToString() : newRegularPrice.ToString();
 
@@ -104,7 +104,7 @@ public class ProductPriceService : IProductPriceService
                     salesPriceMeta.MetaValue = newPromoPrice.ToString();
 
                 variantMetaLookup.MaxPrice = newRegularPrice;
-                variantMetaLookup.MinPrice = promoPrice ?? newRegularPrice;
+                variantMetaLookup.MinPrice = newPromoPrice ?? newRegularPrice;
 
                 if (newPromoPrice != null && salesPriceMeta != null)
                 {

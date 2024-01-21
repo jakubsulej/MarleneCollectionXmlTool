@@ -58,6 +58,7 @@ public struct MetaKeyConstans
         ImportStartedAt, 
         Sku, 
         RegularPrice, 
-        Price
+        Price,
+        SalePrice
     };
 }

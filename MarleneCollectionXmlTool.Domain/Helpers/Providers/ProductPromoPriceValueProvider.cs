@@ -19,15 +19,15 @@ public class ProductPromoPriceValueProvider : IProductPromoPriceValueProvider
     }
 
     public ProductPriceDto GetNewProductPrice(
-        decimal catalogPrice, decimal? promoPrice, decimal currentPrice, decimal? currentPromoPrice)
+        decimal catalogRegularPrice, decimal? catalogPromoPrice, decimal currentRegularPrice, decimal? currentPromoPrice)
     {
-        if (catalogPrice == 0 && promoPrice == 0)
-            return new ProductPriceDto(currentPrice, currentPromoPrice);
+        if (catalogRegularPrice == 0 && catalogPromoPrice == 0)
+            return new ProductPriceDto(currentRegularPrice, currentPromoPrice);
 
-        currentPrice = catalogPrice;
-        currentPromoPrice = promoPrice;
+        currentRegularPrice = catalogRegularPrice;
+        currentPromoPrice = catalogPromoPrice;
         var currentPromoPriceWithMargin = (currentPromoPrice * _priceMarginFactor) + _priceMarginStatic;
-        var catalogPriceWithMargin = (currentPrice * _priceMarginFactor) + _priceMarginStatic;
+        var catalogPriceWithMargin = (currentRegularPrice * _priceMarginFactor) + _priceMarginStatic;
 
         return new ProductPriceDto(catalogPriceWithMargin, currentPromoPriceWithMargin);
     }
